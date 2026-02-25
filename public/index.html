@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 186 Midterm 1 Study Tool</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --card-bg: #0f3460;
+    --card-back-bg: #1a1a40;
+    --accent: #4A90D9;
+    --accent-hover: #5ba0e9;
+    --text: #e8e8e8;
+    --text-muted: #8892a4;
+    --easy: #27ae60;
+    --easy-hover: #2ecc71;
+    --good: #f39c12;
+    --good-hover: #f1c40f;
+    --hard: #c0392b;
+    --hard-hover: #e74c3c;
+    --radius: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--accent);
+    text-align: center;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  /* Deck Selector */
+  .deck-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    width: 100%;
+    max-width: 560px;
+  }
+  .deck-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .deck-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .deck-btn:hover:not(.active) {
+    background: rgba(74,144,217,0.15);
+  }
+
+  /* Progress */
+  .progress-bar-container {
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    background: var(--surface);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    margin-bottom: 12px;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  /* Card */
+  .card-scene {
+    width: 100%;
+    max-width: 560px;
+    perspective: 800px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .card-flipper {
+    width: 100%;
+    min-height: 320px;
+    position: relative;
+    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .card-flipper.flipped {
+    transform: rotateY(180deg);
+  }
+  .card-face {
+    width: 100%;
+    min-height: 320px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    overflow-y: auto;
+  }
+  .card-front {
+    background: var(--card-bg);
+    border: 1px solid rgba(74,144,217,0.3);
+  }
+  .card-back {
+    background: var(--card-back-bg);
+    border: 1px solid rgba(74,144,217,0.2);
+    transform: rotateY(180deg);
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .card-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .card-content {
+    font-size: 1rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .card-content code {
+    background: rgba(74,144,217,0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    color: #7ec8f8;
+  }
+  .card-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  /* Rating Buttons */
+  .rating-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 560px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .rating-buttons.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .rate-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #fff;
+  }
+  .rate-btn.easy { background: var(--easy); }
+  .rate-btn.easy:hover { background: var(--easy-hover); transform: translateY(-1px); }
+  .rate-btn.good { background: var(--good); }
+  .rate-btn.good:hover { background: var(--good-hover); transform: translateY(-1px); }
+  .rate-btn.hard { background: var(--hard); }
+  .rate-btn.hard:hover { background: var(--hard-hover); transform: translateY(-1px); }
+  .rate-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  /* Restart */
+  .restart-btn {
+    margin-top: 16px;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .restart-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Complete screen */
+  .complete-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 560px;
+    min-height: 320px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 40px 24px;
+    box-shadow: var(--shadow);
+  }
+  .complete-screen h2 {
+    font-size: 1.5rem;
+    color: var(--accent);
+  }
+  .complete-screen p {
+    color: var(--text-muted);
+  }
+  .complete-screen .restart-btn {
+    margin-top: 8px;
+    border-color: var(--accent);
+    color: var(--accent);
+    font-size: 0.9rem;
+    padding: 12px 32px;
+  }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    margin-top: 12px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 560px;
+  }
+  .keyboard-hint kbd {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1);
+    font-family: inherit;
+    font-size: 0.7rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    body { padding: 12px; }
+    h1 { font-size: 1.2rem; }
+    .card-face { padding: 20px 16px; min-height: 280px; }
+    .card-flipper { min-height: 280px; }
+    .card-content { font-size: 0.92rem; }
+    .rate-btn { padding: 14px 6px; font-size: 0.85rem; }
+    .keyboard-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>CS 186 Midterm 1</h1>
+<p class="subtitle">UC Berkeley Database Systems -- Spring 2026</p>
+
+<div class="deck-selector">
+  <button class="deck-btn active" id="deckBtn0">Concepts &amp; Vocabulary</button>
+  <button class="deck-btn" id="deckBtn1">Practice Problems</button>
+</div>
+
+<div class="progress-bar-container">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+<div class="progress-info">
+  <span id="cardCounter">Card 1 of 50</span>
+  <span id="seenCounter">Seen: 0</span>
+</div>
+
+<div class="card-scene" id="cardScene">
+  <div class="card-flipper" id="cardFlipper">
+    <div class="card-face card-front">
+      <div class="card-label">Question</div>
+      <div class="card-content" id="frontContent"></div>
+      <div class="card-hint">Tap to reveal answer</div>
+    </div>
+    <div class="card-face card-back">
+      <div class="card-label">Answer</div>
+      <div class="card-content" id="backContent"></div>
+    </div>
+  </div>
+</div>
+
+<div class="complete-screen" id="completeScreen">
+  <h2>Deck Complete!</h2>
+  <p id="completeMsg">You've reviewed all cards in this deck.</p>
+  <button class="restart-btn" id="completeRestartBtn">Restart Deck</button>
+</div>
+
+<div class="rating-buttons" id="ratingButtons">
+  <button class="rate-btn hard" id="btnHard">Hard<span class="rate-label">See again soon</span></button>
+  <button class="rate-btn good" id="btnGood">Good<span class="rate-label">Middle of queue</span></button>
+  <button class="rate-btn easy" id="btnEasy">Easy<span class="rate-label">End of queue</span></button>
+</div>
+
+<button class="restart-btn" id="restartBtn">Restart Deck</button>
+
+<div class="keyboard-hint">
+  <kbd>Space</kbd> flip &nbsp; <kbd>1</kbd> Hard &nbsp; <kbd>2</kbd> Good &nbsp; <kbd>3</kbd> Easy &nbsp; <kbd>R</kbd> Restart
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  // ============================================================
+  //  DECK DATA
+  // ============================================================
+
+  var DECKS = [
+    {
+      name: "Concepts & Vocabulary",
+      cards: [
+        // --- SQL ---
+        { f: "What is a **relation** in the relational model?", b: "A relation is a table. It consists of a schema (column names and types) and an instance (the actual rows/data at a given time)." },
+        { f: "Define: **tuple**, **attribute**, **schema**, **instance**.", b: "Tuple = a row/record. Attribute = a column/field. Schema = the structure (column names + types). Instance = the current set of tuples in the table." },
+        { f: "What does SELECT ... FROM ... WHERE do?", b: "SELECT specifies which columns to return. FROM specifies the table(s). WHERE filters rows based on a condition. Together they form the basic SQL query pattern." },
+        { f: "What does DISTINCT do?", b: "Eliminates duplicate rows from the result set. E.g., SELECT DISTINCT dept FROM Students returns each department only once." },
+        { f: "How does ORDER BY work? What is the default direction?", b: "ORDER BY sorts the result set by one or more columns. Default is ASC (ascending). Use DESC for descending. E.g., ORDER BY gpa DESC." },
+        { f: "What happens with LIMIT without ORDER BY?", b: "The result is non-deterministic. Without ORDER BY, the database can return any arbitrary subset of rows. LIMIT only guarantees the count, not which rows." },
+        { f: "Name the 5 SQL aggregate functions.", b: "AVG (average), SUM (total), COUNT (number of rows), MIN (smallest), MAX (largest). They collapse multiple rows into a single value." },
+        { f: "What does GROUP BY do?", b: "Partitions rows into groups based on column values, then applies aggregate functions to each group independently. E.g., GROUP BY dept creates one group per department." },
+        { f: "What is the difference between WHERE and HAVING?", b: "WHERE filters individual rows BEFORE grouping. HAVING filters groups AFTER aggregation. HAVING can reference aggregate functions; WHERE cannot." },
+        { f: "What is the conceptual evaluation order of a SQL query?", b: "FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY -> LIMIT. This is the logical order, not necessarily the physical execution order." },
+        { f: "What is a **Cross Join**?", b: "The Cartesian product of two tables: every row from table A paired with every row from table B. If A has m rows and B has n rows, result has m * n rows." },
+        { f: "What is an **Inner Join**?", b: "Returns only rows where the join condition is satisfied in both tables. Rows without a match in the other table are excluded." },
+        { f: "What is a **Natural Join**?", b: "An inner join that automatically matches on ALL columns with the same name in both tables. No explicit ON clause needed -- but can be dangerous if column names coincidentally match." },
+        { f: "How does LEFT OUTER JOIN work?", b: "Keeps ALL rows from the left table. If a left row has no match in the right table, the right columns are filled with NULLs. Guarantees every left row appears at least once." },
+        { f: "Explain UNION vs UNION ALL.", b: "UNION combines two result sets and removes duplicates (set semantics). UNION ALL keeps all rows including duplicates (bag semantics). UNION ALL is faster since it skips deduplication." },
+        { f: "What are INTERSECT and EXCEPT?", b: "INTERSECT returns rows that appear in BOTH queries. EXCEPT returns rows from the first query that do NOT appear in the second. Both remove duplicates by default." },
+        { f: "Correlated vs uncorrelated subquery?", b: "Uncorrelated: inner query runs once independently. Correlated: inner query references a column from the outer query and re-executes for each outer row. Correlated subqueries are generally slower." },
+        { f: "What is a CTE (WITH clause)?", b: "Common Table Expression: a named temporary result set defined with WITH name AS (SELECT ...). Makes complex queries more readable. The CTE can be referenced multiple times in the main query." },
+        { f: "What is a **View**?", b: "A named, stored query created with CREATE VIEW name AS SELECT ... Acts like a virtual table. The query runs each time the view is referenced -- it does not store data." },
+
+        // --- Disks & Files ---
+        { f: "How does an **HDD** (Hard Disk Drive) work?", b: "Spinning magnetic platters with read/write heads on an arm. Data organized in tracks and sectors. Good for sequential access (head stays in place), bad for random access (must seek to different tracks)." },
+        { f: "How does an **SSD** compare to HDD?", b: "No moving parts (flash memory). Much faster random reads. Writes can be slower due to erase-before-write and wear leveling. More expensive per GB but significantly faster for random I/O." },
+        { f: "What is a **page** in the context of disk I/O?", b: "The fundamental unit of data transfer between disk and memory. Typically 4KB-8KB. All reads and writes happen at page granularity -- you always read/write a full page." },
+        { f: "What is a **heap file**?", b: "An unordered collection of pages containing records. Records are stored wherever there is free space. No sorting or indexing is imposed on the data." },
+        { f: "What is a **sorted file**?", b: "Pages are stored in sorted order based on some key. Enables binary search for equality queries (log2(B) IOs) but makes inserts and deletes expensive since records must be shifted." },
+        { f: "Describe a **slotted page** layout.", b: "Slot directory grows from the bottom of the page. Records grow from the top. The directory maps slot numbers to record offsets. Supports variable-length records and allows record movement within the page without changing external references." },
+        { f: "Fixed-length vs variable-length records?", b: "Fixed-length: every record is the same size; can locate field i by offset arithmetic. Variable-length: records differ in size; need a header with pointers/offsets to locate each field." },
+        { f: "What is a **null bitmap**?", b: "A compact bit array in each record's header, with one bit per field. A set bit indicates that field is NULL. Avoids wasting space storing actual null values." },
+
+        // --- IO Cost Model ---
+        { f: "What are B and R in the I/O cost model?", b: "B = number of pages in the file. R = number of records per page. We count only disk I/Os (page reads/writes) and ignore CPU cost, sequential vs random distinction, and prefetching." },
+        { f: "I/O costs for a **heap file**?", b: "Equality search: average B/2 (stop when found). Range search (full scan): B. Insert: 2 IOs (read last page + write). Delete: search cost + 1 IO (write modified page)." },
+        { f: "I/O costs for a **sorted file**?", b: "Equality search: log2(B) via binary search. Range search: log2(B) + number of matching pages. Insert/delete: expensive -- must shift pages to maintain sort order (up to B reads + B writes)." },
+
+        // --- B+ Trees ---
+        { f: "What are the two types of nodes in a B+ tree?", b: "Interior (internal) nodes: contain keys and child pointers for routing searches. Leaf nodes: contain keys and record pointers (or actual records) -- this is where the data lives." },
+        { f: "What is **order d** in a B+ tree?", b: "Each node (except the root) holds between d and 2d keys. The root holds between 1 and 2d keys. Order d determines the minimum fill factor of the tree." },
+        { f: "What is the maximum **fanout** of a B+ tree interior node?", b: "2d + 1. An interior node with 2d keys has 2d + 1 child pointers (one more pointer than keys)." },
+        { f: "Why are B+ tree leaves linked?", b: "Leaf nodes form a doubly-linked list. This allows efficient range scans: find the start key, then follow pointers to scan consecutive leaves without going back up the tree." },
+        { f: "How does B+ tree **insertion** work?", b: "1) Search to find the correct leaf. 2) Insert key into leaf. 3) If leaf overflows (> 2d keys), split it into two leaves and push a COPY of the middle key up to the parent. 4) Splitting may cascade up to the root." },
+        { f: "How does B+ tree **deletion** work?", b: "1) Search for the key in a leaf and remove it. 2) If the leaf becomes underfull (< d keys), try to redistribute keys from a sibling. 3) If redistribution fails, merge with a sibling and remove the separating key from the parent. May cascade." },
+        { f: "What is **bulk loading** a B+ tree?", b: "Sort all records first, then build the tree bottom-up by filling leaf pages to a chosen fill factor and creating parent nodes. Much faster than repeated single inserts." },
+        { f: "B+ tree Alternatives 1, 2, and 3?", b: "Alt 1: Leaf stores actual data records (the index file IS the data file). Alt 2: Leaf stores (key, recordID) pairs. Alt 3: Leaf stores (key, list of recordIDs). Alt 1 forces clustered; Alt 2/3 allow unclustered." },
+        { f: "What is a **clustered** index?", b: "The order of leaf entries matches the physical order of records on disk. Data file is sorted by the index key. Enables efficient range scans since consecutive records are on consecutive pages." },
+        { f: "What is an **unclustered** index?", b: "Leaf order does NOT match physical record order on disk. Record pointers scatter across many different pages. Range scans can be very expensive -- potentially 1 IO per record." },
+        { f: "How many clustered indexes can a table have?", b: "Only ONE. Data can only be physically sorted in one order. All other indexes on the table must be unclustered." },
+        { f: "What is a **composite index** and the **prefix rule**?", b: "An index on multiple columns, e.g., (A, B). The prefix rule: the index can be used for queries on A alone, or A AND B together, but NOT B alone. The leftmost prefix must be constrained." },
+
+        // --- Spatial Indexes ---
+        { f: "What is a **KD Tree**?", b: "A binary search tree for multi-dimensional data. Each level alternates the split dimension (e.g., level 0 splits on X, level 1 on Y, level 2 on X, ...). Partitions space into non-overlapping regions." },
+        { f: "How does **KD Tree search** work?", b: "At each node, compare the query point's coordinate for the current dimension. Go left if less, right if greater. For nearest-neighbor, must also backtrack to check the other subtree if it could contain a closer point." },
+        { f: "What is an **R-Tree**?", b: "Like a B+ tree for multi-dimensional data. Each node contains MBRs (Minimum Bounding Rectangles) that enclose all data in its subtree. Unlike KD trees, R-tree rectangles CAN overlap." },
+        { f: "How does R-Tree insertion choose a subtree?", b: "Choose the subtree whose MBR needs the LEAST expansion (smallest increase in area) to accommodate the new point or rectangle." },
+
+        // --- Buffer Management ---
+        { f: "What is a **buffer pool**?", b: "A large region of main memory divided into fixed-size frames (each holds one page). Acts as a cache for disk pages. Managed by the buffer manager, which handles page requests from queries." },
+        { f: "What metadata does each buffer frame track?", b: "Page ID (which disk page is stored here), dirty bit (has the page been modified?), and pin count (how many queries are currently using this page)." },
+        { f: "What does the **dirty bit** mean?", b: "The page has been modified in memory since it was read from disk. When this page is eventually evicted, it MUST be written back to disk first. The requestor (not the buffer manager) sets the dirty bit on unpin." },
+        { f: "What does **pin count** mean?", b: "The number of transactions/queries currently using this page. A page with pin count > 0 CANNOT be evicted. Pin increments on request, decrements on release (unpin)." },
+        { f: "How do **pin** and **unpin** work?", b: "Pin (request page): If page is in buffer, increment pin count. If not, read from disk into a free frame, set pin = 1. Unpin (release): Decrement pin count, optionally set dirty bit if the page was modified." },
+        { f: "What is the **LRU** replacement policy?", b: "Least Recently Used: evict the page whose most recent access is oldest. Good general-purpose policy but suffers from sequential flooding." },
+        { f: "What is the **MRU** replacement policy?", b: "Most Recently Used: evict the page that was accessed most recently. Better than LRU for sequential scans -- evicts the page we just finished with rather than useful cached pages." },
+        { f: "What is **sequential flooding**?", b: "When LRU is used during a sequential scan of a file larger than the buffer: each new page evicts the least recently used page, which pollutes the buffer and evicts useful pages from other queries. MRU avoids this." },
+        { f: "How does the **Clock** replacement policy work?", b: "Frames arranged in a circle with a sweeping clock hand. Each frame has a reference counter. On eviction: if counter > 0, decrement and skip; if counter = 0, evict. Approximates LRU with less overhead." },
+        { f: "What does PostgreSQL use for buffer replacement?", b: "Clock policy with a maximum reference counter of 5. This gives frequently-accessed pages more protection from eviction than basic Clock (counter max of 1)." }
+      ]
+    },
+    {
+      name: "Practice Problems",
+      cards: [
+        // SQL Practice
+        { f: "Given Students(sid, name, gpa, dept), write SQL to find the average GPA per department, but only show departments with avg GPA > 3.5.", b: "SELECT dept, AVG(gpa)\nFROM Students\nGROUP BY dept\nHAVING AVG(gpa) > 3.5" },
+        { f: "What's wrong with this query?\nSELECT name, MAX(gpa) FROM Students", b: "name is not aggregated and not in GROUP BY. This query is invalid -- you can't mix aggregated and non-aggregated columns without GROUP BY." },
+        { f: "Given Sailors(sid, sname, rating) and Reserves(sid, bid, day), find names of sailors who reserved boat 103 using a subquery.", b: "SELECT sname\nFROM Sailors\nWHERE sid IN (\n  SELECT sid FROM Reserves WHERE bid = 103\n)" },
+        { f: "SELECT dept, COUNT(*)\nFROM Students\nWHERE gpa > 3.0\nGROUP BY dept\nHAVING COUNT(*) > 5\nORDER BY dept\nLIMIT 3;\n\nWhat is the conceptual evaluation order?", b: "1. FROM Students\n2. WHERE gpa > 3.0\n3. GROUP BY dept\n4. HAVING COUNT(*) > 5\n5. SELECT dept, COUNT(*)\n6. ORDER BY dept\n7. LIMIT 3" },
+        { f: "Enrollments(sid, cid, grade), Courses(cid, name, units). Find course names where no student got below a 'B'. Use NOT EXISTS.", b: "SELECT c.name\nFROM Courses c\nWHERE NOT EXISTS (\n  SELECT 1 FROM Enrollments e\n  WHERE e.cid = c.cid\n  AND e.grade < 'B'\n)" },
+        { f: "What does UNION vs UNION ALL do differently?", b: "UNION removes duplicates (set semantics). UNION ALL keeps all rows including duplicates (bag semantics). UNION ALL is faster since no dedup needed." },
+        { f: "Students(sid, name, dept). Find departments that have MORE students than the CS department.", b: "SELECT dept\nFROM Students\nGROUP BY dept\nHAVING COUNT(*) > (\n  SELECT COUNT(*)\n  FROM Students\n  WHERE dept = 'CS'\n)" },
+        { f: "LEFT OUTER JOIN: Students LEFT JOIN Enrollments ON Students.sid = Enrollments.sid. If student 'Alice' has no enrollments, what happens?", b: "Alice still appears in the result. All Enrollment columns for her row will be NULL." },
+        { f: "True or False: SELECT DISTINCT name FROM Students ORDER BY gpa is valid SQL.", b: "False. When using DISTINCT, ORDER BY can only reference columns in the SELECT list. gpa is not in SELECT, so this is invalid." },
+        { f: "Write a CTE that finds the max GPA, then selects all students with that GPA.", b: "WITH MaxGPA AS (\n  SELECT MAX(gpa) AS mgpa\n  FROM Students\n)\nSELECT *\nFROM Students, MaxGPA\nWHERE gpa = mgpa" },
+
+        // Disks & Files Practice
+        { f: "CREATE TABLE Products(id INTEGER PRIMARY KEY, name VARCHAR(10) NOT NULL, price INTEGER NOT NULL, desc CHAR(20)). Integer=4B, CHAR(n)=n bytes, VARCHAR(n)=up to n bytes, header=8B. Min and max record size?", b: "Min: header(8) + id(4) + name(0, empty VARCHAR) + price(4) + desc(20) = 36 bytes.\nMax: header(8) + id(4) + name(10) + price(4) + desc(20) = 46 bytes.\nNote: desc is CHAR(20) so always 20 bytes." },
+        { f: "Pages are 1KB. Fixed-length records are 64 bytes. Page header has a bitmap (1 bit per slot, rounded up to nearest byte). How many records fit on a packed page?", b: "Let n = # records. Need: 64n + ceil(n/8) <= 1024.\nTry n=15: 64(15) + 2 = 962 <= 1024. Yes.\nTry n=16: 64(16) + 2 = 1026 > 1024. No.\nAnswer: 15 records." },
+        { f: "You have 10,000 records, 50 records per page, all data pages half full. How many data pages in a heap file?", b: "Half full means 25 records per page.\n10,000 / 25 = 400 data pages." },
+        { f: "8 MB heap file, 64 KB pages (1 MB = 1000 KB). How many pages?", b: "8 MB = 8000 KB.\n8000 / 64 = 125 pages." },
+        { f: "A heap file has 125 pages. Worst case, how many IOs to find a record by primary key?", b: "125 IOs (must scan all pages since heap is unsorted -- the record could be on the very last page)." },
+        { f: "Same 125-page file, now sorted. How many IOs for equality search on the sort key?", b: "ceil(log2(125)) = 7 IOs (binary search on sorted pages)." },
+
+        // B+ Tree Practice
+        { f: "Order d=2 B+ tree. What is the maximum fanout of an interior node?", b: "2d + 1 = 2(2) + 1 = 5" },
+        { f: "Order d=2 B+ tree. How many keys can each interior node hold?", b: "Between d and 2d keys: between 2 and 4 keys (except root: 1 to 4)." },
+        { f: "Height-3 alternative 2 B+ tree, order d. Equality search on primary key costs how many IOs?", b: "3 IOs (traverse root -> internal -> leaf) + 1 IO (fetch the actual data record) = 4 IOs total." },
+        { f: "B+ tree order d=1, leaves hold 2 entries. Leaves: [0,1] [5] [8] [10]. Root=[6], internals [5],[10]. Insert key 7. What happens?", b: "7 goes in leaf [8] -> becomes [7,8]. No split needed. Tree unchanged except leaf [8] -> [7,8]." },
+        { f: "Same tree (after inserting 7). Now insert key 9. Leaf [7,8] gets 9 -> [7,8,9] overflows (max 2). What happens?", b: "Split: left=[7,8], right=[9]. Push copy of 9 up to parent [10] -> parent becomes [9,10]. No further splits needed." },
+        { f: "A table has 1000 records. Bulk load an Alt-2 B+ tree with fill factor 2/3 and leaves hold 6 entries max. How many leaf pages?", b: "Fill factor 2/3 -> 4 entries per leaf.\n1000 / 4 = 250 leaf pages." },
+        { f: "True or False: You can have 2 clustered indexes on the same table.", b: "False. Only ONE clustered index per table because data can only be physically sorted in one order." },
+        { f: "Composite index on (last_name, first_name). Which queries can use it?\nA) WHERE last_name = 'Smith'\nB) WHERE first_name = 'John'\nC) WHERE last_name = 'Smith' AND first_name = 'John'", b: "A) Yes -- matches prefix.\nB) No -- first_name is not the prefix.\nC) Yes -- matches full composite key." },
+        { f: "Clustered Alt-2 B+ tree, height 2, 100 matching records across 5 consecutive leaf pages. How many IOs for a range query?", b: "2 IOs (traverse height-2 tree) + 5 IOs (read 5 consecutive leaf pages) + 5 IOs (read 5 data pages, clustered so sequential) = 12 IOs." },
+        { f: "Same scenario but UNCLUSTERED index. How many IOs for the range query?", b: "2 IOs (traverse) + 5 IOs (leaf pages) + up to 100 IOs (each record may be on different data page) = up to 107 IOs. Much worse than clustered!" },
+        { f: "B+ tree order d=1. Insert keys 5, 10, 15, 20, 25 in order starting from empty. What is the final tree?", b: "After 5,10: leaf [5,10].\nInsert 15: split -> [5],[10,15], root=[10].\nInsert 20: [10,15] -> [10,15,20] split -> [10],[15,20], push 15 up -> root=[10,15].\nInsert 25: [15,20] -> [15,20,25] split -> [15],[20,25], push 20 up -> root=[10,15,20]." },
+        { f: "What is the difference between Alternative 1, 2, and 3 for B+ tree leaf entries?", b: "Alt 1: Leaf stores actual data records (file IS the index). Only option for clustered.\nAlt 2: Leaf stores (key, recordID) pairs.\nAlt 3: Leaf stores (key, list of recordIDs).\nAlt 2/3 can be unclustered." },
+
+        // Spatial Index Practice
+        { f: "KD tree with points. Root splits on X. At the next level, what dimension do we split on?", b: "Y dimension. KD trees alternate: Level 0 = X, Level 1 = Y, Level 2 = X, etc." },
+        { f: "KD tree: root splits X=5. Left child splits Y=3. We search for point (4,6). Which path?", b: "At root: 4 < 5 -> go left.\nAt Y=3 node: 6 > 3 -> go right.\nContinue down the right subtree." },
+        { f: "R-tree vs KD tree: which one allows overlapping regions?", b: "R-tree. R-tree nodes contain MBRs (Minimum Bounding Rectangles) that CAN overlap. KD trees partition space into non-overlapping regions." },
+        { f: "In an R-tree insert, how do we decide which subtree to insert into?", b: "Choose the subtree whose MBR needs the LEAST expansion (smallest increase in area) to include the new point/rectangle." },
+        { f: "Why can't a B+ tree on (birth_year, weight) efficiently answer: 'Find all people with weight between 150-180'?", b: "Composite index prefix rule: since birth_year comes first, the index is first sorted by birth_year. A query on just weight skips the prefix and can't leverage the index ordering -- must scan everything." },
+
+        // Buffer Management Practice
+        { f: "Buffer pool: 3 frames, LRU policy. Access: A B C D A B. Initially empty. Trace buffer state and count misses.", b: "A->[A] miss. B->[A,B] miss. C->[A,B,C] miss.\nD->evict A(LRU)->[B,C,D] miss.\nA->evict B(LRU)->[C,D,A] miss.\nB->evict C(LRU)->[D,A,B] miss.\n6 misses, 0 hits." },
+        { f: "Same access pattern A B C D A B but with MRU policy. Trace it.", b: "A->[A] miss. B->[A,B] miss. C->[A,B,C] miss.\nD->evict C(MRU)->[A,B,D] miss.\nA->already in buffer->hit!\nB->already in buffer->hit!\n4 misses, 2 hits. MRU wins here!" },
+        { f: "Clock policy. 3 frames: A(ref=0), B(ref=1), C(ref=0). Hand at A. Request page D. What gets evicted?", b: "Hand at A: ref=0 -> evict A. Load D into A's frame. Answer: A is evicted." },
+        { f: "Clock policy. 3 frames: A(ref=1), B(ref=1), C(ref=0). Hand at A. Request page D.", b: "Hand at A: ref=1 -> set to 0, advance.\nHand at B: ref=1 -> set to 0, advance.\nHand at C: ref=0 -> evict C. Load D." },
+        { f: "A page has pin count = 3 and dirty bit = true. Can it be evicted?", b: "No. Pin count > 0 means at least one query is using it. Must wait until all queries unpin (pin count = 0). When eventually evicted, dirty bit = true means it must be written to disk first." },
+        { f: "Why does LRU perform poorly on sequential scans of a file larger than the buffer?", b: "Sequential flooding: each new page evicts the least recently used, which was the previous scan page. Useful cached pages from OTHER queries get evicted. MRU is better -- it evicts the page we just finished with." },
+        { f: "True or False: The buffer manager decides when to set the dirty bit.", b: "False. The REQUESTOR (query/transaction) tells the buffer manager to set the dirty bit when unpinning a page that was modified." }
+      ]
+    }
+  ];
+
+  // ============================================================
+  //  STATE
+  // ============================================================
+
+  var currentDeckIdx = 0;
+  var queue = [];
+  var currentPos = 0;
+  var seen = {};
+  var seenCount = 0;
+  var isFlipped = false;
+  var deckComplete = false;
+
+  // ============================================================
+  //  DOM REFERENCES
+  // ============================================================
+
+  var cardScene    = document.getElementById("cardScene");
+  var cardFlipper  = document.getElementById("cardFlipper");
+  var frontContent = document.getElementById("frontContent");
+  var backContent  = document.getElementById("backContent");
+  var ratingBtns   = document.getElementById("ratingButtons");
+  var progressFill = document.getElementById("progressFill");
+  var cardCounter  = document.getElementById("cardCounter");
+  var seenCounterEl= document.getElementById("seenCounter");
+  var completeScr  = document.getElementById("completeScreen");
+  var completeMsg  = document.getElementById("completeMsg");
+  var restartBtnEl = document.getElementById("restartBtn");
+  var deckBtn0     = document.getElementById("deckBtn0");
+  var deckBtn1     = document.getElementById("deckBtn1");
+  var btnHard      = document.getElementById("btnHard");
+  var btnGood      = document.getElementById("btnGood");
+  var btnEasy      = document.getElementById("btnEasy");
+  var completeRestartBtn = document.getElementById("completeRestartBtn");
+
+  // ============================================================
+  //  HELPERS
+  // ============================================================
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // Lightweight markdown-ish formatting for card text
+  // Handles **bold**, `code`, and preserves newlines
+  function formatText(text) {
+    var escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    // Bold
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    // Inline code
+    escaped = escaped.replace(/`([^`]+)`/g, "<code>$1</code>");
+    // Newlines to <br>
+    escaped = escaped.replace(/\n/g, "<br>");
+    return escaped;
+  }
+
+  // ============================================================
+  //  CORE LOGIC
+  // ============================================================
+
+  function loadDeck(idx) {
+    currentDeckIdx = idx;
+    var deck = DECKS[idx];
+    var indices = [];
+    for (var i = 0; i < deck.cards.length; i++) indices.push(i);
+    queue = shuffle(indices);
+    currentPos = 0;
+    seen = {};
+    seenCount = 0;
+    isFlipped = false;
+    deckComplete = false;
+    completeScr.style.display = "none";
+    cardScene.style.display = "block";
+    restartBtnEl.style.display = "";
+    ratingBtns.classList.remove("visible");
+    showCard();
+  }
+
+  function switchDeck(idx) {
+    deckBtn0.classList.toggle("active", idx === 0);
+    deckBtn1.classList.toggle("active", idx === 1);
+    loadDeck(idx);
+  }
+
+  function showCard() {
+    if (currentPos >= queue.length) {
+      finishDeck();
+      return;
+    }
+    var deck = DECKS[currentDeckIdx];
+    var cardIdx = queue[currentPos];
+    var card = deck.cards[cardIdx];
+
+    isFlipped = false;
+    cardFlipper.classList.remove("flipped");
+    ratingBtns.classList.remove("visible");
+
+    frontContent.innerHTML = formatText(card.f);
+    backContent.innerHTML = formatText(card.b);
+
+    if (!seen[cardIdx]) {
+      seen[cardIdx] = true;
+      seenCount++;
+    }
+    updateProgress();
+  }
+
+  function flipCard() {
+    if (deckComplete) return;
+    if (!isFlipped) {
+      isFlipped = true;
+      cardFlipper.classList.add("flipped");
+      ratingBtns.classList.add("visible");
+    }
+  }
+
+  function rateCard(rating) {
+    if (!isFlipped || deckComplete) return;
+
+    // Remove current card from its position
+    var removedIdx = queue.splice(currentPos, 1)[0];
+    var remaining = queue.length - currentPos;
+
+    if (rating === "easy") {
+      queue.push(removedIdx);
+    } else if (rating === "good") {
+      var insertAt = currentPos + Math.floor(remaining / 2);
+      queue.splice(insertAt, 0, removedIdx);
+    } else {
+      // hard: 1-3 cards ahead
+      var offset = Math.min(1 + Math.floor(Math.random() * 3), remaining);
+      queue.splice(currentPos + offset, 0, removedIdx);
+    }
+
+    showCard();
+  }
+
+  function updateProgress() {
+    var deck = DECKS[currentDeckIdx];
+    var total = deck.cards.length;
+
+    var pct = Math.round((seenCount / total) * 100);
+    progressFill.style.width = pct + "%";
+    cardCounter.textContent = "Card " + Math.min(currentPos + 1, queue.length) + " of " + queue.length + " in queue";
+    seenCounterEl.textContent = "Seen: " + seenCount + " / " + total;
+  }
+
+  function finishDeck() {
+    deckComplete = true;
+    cardScene.style.display = "none";
+    ratingBtns.classList.remove("visible");
+    restartBtnEl.style.display = "none";
+    completeScr.style.display = "flex";
+    var deck = DECKS[currentDeckIdx];
+    completeMsg.textContent = 'You reviewed all ' + deck.cards.length + ' cards in "' + deck.name + '". Restart to go again!';
+    progressFill.style.width = "100%";
+    cardCounter.textContent = "Done!";
+    seenCounterEl.textContent = "Seen: " + deck.cards.length + " / " + deck.cards.length;
+  }
+
+  function restartDeck() {
+    loadDeck(currentDeckIdx);
+  }
+
+  // ============================================================
+  //  EVENT LISTENERS
+  // ============================================================
+
+  cardScene.addEventListener("click", flipCard);
+
+  deckBtn0.addEventListener("click", function() { switchDeck(0); });
+  deckBtn1.addEventListener("click", function() { switchDeck(1); });
+
+  btnHard.addEventListener("click", function(e) { e.stopPropagation(); rateCard("hard"); });
+  btnGood.addEventListener("click", function(e) { e.stopPropagation(); rateCard("good"); });
+  btnEasy.addEventListener("click", function(e) { e.stopPropagation(); rateCard("easy"); });
+
+  restartBtnEl.addEventListener("click", restartDeck);
+  completeRestartBtn.addEventListener("click", restartDeck);
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      flipCard();
+    } else if (e.key === "1" && isFlipped) {
+      rateCard("hard");
+    } else if (e.key === "2" && isFlipped) {
+      rateCard("good");
+    } else if (e.key === "3" && isFlipped) {
+      rateCard("easy");
+    } else if (e.key === "r" || e.key === "R") {
+      restartDeck();
+    }
+  });
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+
+  loadDeck(0);
+
+})();
+</script>
+</body>
+</html>
