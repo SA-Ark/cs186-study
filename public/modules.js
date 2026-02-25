@@ -289,9 +289,11 @@
     }
 
     // Add module picker button to header
-    var moduleBtn = ce('button', 'background:none;border:none;font-size:1.1em;cursor:pointer;padding:4px;color:#4A90D9;font-weight:700;');
+    var moduleBtn = document.createElement('button');
+    moduleBtn.id = 'module-btn';
     moduleBtn.title = 'Learning Modules';
-    moduleBtn.textContent = '\u{1F4DA}';
+    moduleBtn.style.cssText = 'background:rgba(74,144,217,0.15);border:1px solid #4A90D9;font-size:0.7em;cursor:pointer;padding:3px 8px;color:#4A90D9;font-weight:700;border-radius:6px;margin-left:4px;white-space:nowrap;';
+    moduleBtn.textContent = 'Modules';
     var closeBtn = header.querySelector('#chat-close');
     header.insertBefore(moduleBtn, closeBtn);
 
