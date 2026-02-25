@@ -49,6 +49,36 @@ function getCredPath() {
   );
 }
 
+/**
+ * Bootstrap credentials file from environment variables if it doesn't exist.
+ * This supports deployment to environments (like Coolify/Docker) where
+ * OAUTH_REFRESH_TOKEN is set as an env var instead of a file.
+ */
+function bootstrapCredentials() {
+  const credPath = getCredPath();
+  if (fs.existsSync(credPath)) return;
+
+  const refreshToken = process.env.OAUTH_REFRESH_TOKEN;
+  if (!refreshToken) return;
+
+  // Ensure directory exists
+  const dir = path.dirname(credPath);
+  if (!dir.startsWith("/app")) {
+    // For non-app paths, ensure the directory exists
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  const data = {
+    claudeAiOauth: {
+      accessToken: "",
+      refreshToken,
+      expiresAt: 0,
+    },
+  };
+  fs.writeFileSync(credPath, JSON.stringify(data, null, 2));
+  console.log("Bootstrapped credentials from OAUTH_REFRESH_TOKEN env var");
+}
+
 function loadCredentials() {
   const data = JSON.parse(fs.readFileSync(getCredPath(), "utf-8"));
   return data.claudeAiOauth;
@@ -294,6 +324,9 @@ const server = http.createServer(async (req, res) => {
 
   serveStatic(req, res);
 });
+
+// Bootstrap credentials from env vars if needed (for Docker/Coolify deployment)
+bootstrapCredentials();
 
 server.listen(PORT, () => {
   console.log(`CS186 Study Assistant running on :${PORT}`);
