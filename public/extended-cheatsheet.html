@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 186 Midterm 1 — Extended Reference</title>
+<style>
+:root {
+  --bg: #0f1117; --card: #1a1d2e; --text: #e0e0e8; --muted: #8a8fa8;
+  --accent: #4A90D9; --green: #34d399; --red: #f87171; --orange: #fb923c;
+  --purple: #a78bfa; --yellow: #fbbf24; --border: #2a2d3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  line-height: 1.65; padding: 2rem 1rem;
+  max-width: 960px; margin: 0 auto;
+}
+h1 { font-size: 2rem; text-align: center; color: var(--accent); margin-bottom: 0.25rem; }
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+h2 { font-size: 1.45rem; color: var(--accent); margin: 2.5rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border); }
+h3 { font-size: 1.15rem; color: var(--text); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 1rem; color: var(--orange); margin: 1rem 0 0.4rem; }
+p, li { margin-bottom: 0.4rem; }
+ul, ol { padding-left: 1.5rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: #252838; padding: 0.15em 0.4em; border-radius: 4px;
+  font-size: 0.88em; color: var(--green);
+}
+pre {
+  background: #151825; border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; margin: 0.75rem 0; font-size: 0.85em;
+  color: var(--green); line-height: 1.5;
+}
+.nav-bar {
+  display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.nav-bar a {
+  padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.9em; text-decoration: none;
+}
+.nav-active { background: var(--accent); color: #fff !important; }
+.nav-link { background: var(--card); color: var(--text) !important; border: 1px solid var(--accent); }
+
+.concept-box {
+  border-left: 4px solid var(--accent); background: var(--card);
+  padding: 1rem 1.25rem; margin: 0.75rem 0; border-radius: 0 8px 8px 0;
+}
+.warn-box {
+  border-left: 4px solid var(--red); background: #2a1520;
+  padding: 1rem 1.25rem; margin: 0.75rem 0; border-radius: 0 8px 8px 0;
+}
+.key-box {
+  border-left: 4px solid var(--green); background: #1a2a20;
+  padding: 1rem 1.25rem; margin: 0.75rem 0; border-radius: 0 8px 8px 0;
+}
+.formula-box {
+  border-left: 4px solid var(--purple); background: #1f1a2e;
+  padding: 1rem 1.25rem; margin: 0.75rem 0; border-radius: 0 8px 8px 0;
+  font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.95em;
+}
+.example-box {
+  border-left: 4px solid var(--yellow); background: #2a2510;
+  padding: 1rem 1.25rem; margin: 0.75rem 0; border-radius: 0 8px 8px 0;
+}
+table {
+  width: 100%; border-collapse: collapse; margin: 0.75rem 0;
+  font-size: 0.9em;
+}
+th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
+th { background: var(--card); color: var(--accent); font-weight: 600; }
+
+.toc { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+.toc h3 { margin-top: 0; color: var(--accent); }
+.toc ol { padding-left: 1.25rem; }
+.toc li { margin-bottom: 0.25rem; }
+
+@media print {
+  body { background: #fff; color: #000; font-size: 9pt; line-height: 1.35; }
+  .nav-bar, .no-print { display: none; }
+  .concept-box, .warn-box, .key-box, .formula-box, .example-box { background: #f5f5f5; border-left-width: 3px; }
+  code { background: #eee; color: #333; }
+  pre { background: #f0f0f0; color: #333; border-color: #ccc; }
+  h2 { color: #333; border-bottom-color: #ccc; }
+  th { background: #ddd; color: #333; }
+}
+</style>
+</head>
+<body>
+
+<h1>CS 186 Midterm 1 — Extended Reference</h1>
+<p class="subtitle">Everything you need to deeply understand each topic. Spring 2026.</p>
+
+<div class="nav-bar">
+  <a href="index.html" class="nav-link">Flashcards</a>
+  <a href="study-guide.html" class="nav-link">Study Guide</a>
+  <a href="cheatsheet.html" class="nav-link">Cheat Sheet</a>
+  <a href="extended-cheatsheet.html" class="nav-active">Extended Reference</a>
+  <a href="practice-tests.html" class="nav-link">Practice Tests</a>
+</div>
+
+<div class="toc">
+<h3>Table of Contents</h3>
+<ol>
+<li><a href="#sql">SQL Deep Dive</a> — evaluation order, aggregation rules, join semantics, subquery patterns, NULL pitfalls</li>
+<li><a href="#disks">Disks, Files &amp; Records</a> — storage hierarchy, page layout, record formats, size calculations</li>
+<li><a href="#io">IO Cost Model</a> — heap vs sorted costs, how to count IOs, worked examples</li>
+<li><a href="#btree">B+ Trees</a> — structure, insert/delete with splits/merges, bulk loading, cost analysis</li>
+<li><a href="#spatial">Spatial &amp; Vector Indexes</a> — KD trees, R-trees, nearest neighbor, comparison</li>
+<li><a href="#buffer">Buffer Management</a> — buffer pool, LRU/MRU/Clock traces, sequential flooding</li>
+<li><a href="#patterns">Exam Question Patterns</a> — what types of questions to expect and how to approach them</li>
+</ol>
+</div>
+
+<!-- ====================================================================== -->
+<h2 id="sql">1. SQL Deep Dive</h2>
+<!-- ====================================================================== -->
+
+<h3>1.1 Conceptual Evaluation Order</h3>
+<p>This is the single most important thing to understand about SQL. Every query is <em>logically</em> evaluated in this order:</p>
+
+<div class="formula-box">
+<strong>FROM</strong> (identify tables + joins) &rarr; <strong>WHERE</strong> (filter individual rows) &rarr; <strong>GROUP BY</strong> (form groups) &rarr; <strong>HAVING</strong> (filter groups) &rarr; <strong>SELECT</strong> (compute output columns) &rarr; <strong>ORDER BY</strong> (sort) &rarr; <strong>LIMIT</strong> (truncate)
+</div>
+
+<div class="concept-box">
+<h4>Why this matters for exams:</h4>
+<ul>
+<li>You <strong>cannot</strong> use an alias defined in SELECT inside WHERE (WHERE runs before SELECT)</li>
+<li>WHERE filters rows <em>before</em> groups are formed. HAVING filters <em>after</em> aggregation</li>
+<li>WHERE <strong>cannot</strong> contain aggregate functions. HAVING <strong>can</strong></li>
+<li>ORDER BY is the only clause that can reference SELECT aliases (it runs after SELECT)</li>
+</ul>
+</div>
+
+<h3>1.2 Aggregation Rules</h3>
+<p>Aggregates collapse multiple rows into a single value:</p>
+<ul>
+<li><code>COUNT(*)</code> — counts all rows, including NULLs</li>
+<li><code>COUNT(col)</code> — counts non-NULL values in that column</li>
+<li><code>COUNT(DISTINCT col)</code> — counts distinct non-NULL values</li>
+<li><code>SUM(col)</code>, <code>AVG(col)</code>, <code>MIN(col)</code>, <code>MAX(col)</code> — all ignore NULLs</li>
+</ul>
+
+<div class="warn-box">
+<h4>The GROUP BY Rule (very commonly tested)</h4>
+<p>If you use an aggregate in SELECT, then <strong>every non-aggregated column in SELECT must appear in GROUP BY</strong>.</p>
+<pre>-- INVALID: name is not aggregated and not in GROUP BY
+SELECT name, MAX(gpa) FROM Students;
+
+-- VALID: dept is in GROUP BY
+SELECT dept, MAX(gpa) FROM Students GROUP BY dept;
+
+-- VALID: no aggregates at all, no GROUP BY needed
+SELECT name, gpa FROM Students;</pre>
+</div>
+
+<h3>1.3 WHERE vs HAVING</h3>
+<div class="example-box">
+<h4>Example: "Find departments where the average GPA of students with GPA above 2.0 is greater than 3.5"</h4>
+<pre>SELECT dept, AVG(gpa)
+FROM Students
+WHERE gpa > 2.0          -- filters ROWS: only students with gpa > 2.0
+GROUP BY dept             -- groups remaining rows by dept
+HAVING AVG(gpa) > 3.5    -- filters GROUPS: only depts with high avg</pre>
+<p>Step by step:</p>
+<ol>
+<li>FROM Students — start with all student rows</li>
+<li>WHERE gpa > 2.0 — remove students with gpa &le; 2.0</li>
+<li>GROUP BY dept — form groups by department</li>
+<li>HAVING AVG(gpa) > 3.5 — remove groups where average &le; 3.5</li>
+<li>SELECT dept, AVG(gpa) — compute output</li>
+</ol>
+</div>
+
+<h3>1.4 Joins Explained</h3>
+
+<h4>Cross Join (Cartesian Product)</h4>
+<p>Every row of A paired with every row of B. If A has 5 rows and B has 3 rows, result has 15 rows.</p>
+<pre>SELECT * FROM A, B               -- implicit cross join
+SELECT * FROM A CROSS JOIN B      -- explicit</pre>
+
+<h4>Inner Join</h4>
+<p>Cross join + filter. Only rows where the ON condition is true.</p>
+<pre>SELECT * FROM A INNER JOIN B ON A.id = B.a_id</pre>
+
+<h4>Natural Join</h4>
+<p>Auto-matches on ALL columns with the same name. Dangerous if tables share column names you didn't intend to join on.</p>
+<pre>SELECT * FROM A NATURAL JOIN B  -- matches all same-name columns</pre>
+
+<h4>LEFT OUTER JOIN</h4>
+<div class="key-box">
+<p>Keeps <strong>ALL rows from the left table</strong>. If a left row has no match in the right table, right columns become NULL.</p>
+<pre>SELECT s.name, e.grade
+FROM Students s LEFT JOIN Enrollments e ON s.sid = e.sid
+-- Students with no enrollments appear with grade = NULL</pre>
+<p><strong>Finding non-matches:</strong> <code>WHERE e.sid IS NULL</code> finds students with no enrollments.</p>
+</div>
+
+<h4>Self Join</h4>
+<p>A table joined with itself. Must use aliases to distinguish the two "copies".</p>
+<pre>-- Find pairs of students in the same department
+SELECT a.name, b.name
+FROM Students a, Students b
+WHERE a.dept = b.dept AND a.sid &lt; b.sid</pre>
+
+<h3>1.5 Set Operations</h3>
+<div class="concept-box">
+<p>Both queries must have the <strong>same number of columns with compatible types</strong>.</p>
+<table>
+<tr><th>Operation</th><th>Semantics</th><th>What it does</th></tr>
+<tr><td><code>UNION</code></td><td>Set</td><td>Combine results, remove duplicates</td></tr>
+<tr><td><code>UNION ALL</code></td><td>Bag</td><td>Combine results, keep all duplicates</td></tr>
+<tr><td><code>INTERSECT</code></td><td>Set</td><td>Rows in BOTH results</td></tr>
+<tr><td><code>EXCEPT</code></td><td>Set</td><td>Rows in first but NOT second</td></tr>
+</table>
+</div>
+
+<h3>1.6 Subqueries</h3>
+
+<h4>IN / NOT IN</h4>
+<pre>-- Sailors who reserved boat 103
+SELECT sname FROM Sailors
+WHERE sid IN (SELECT sid FROM Reserves WHERE bid = 103)</pre>
+
+<div class="warn-box">
+<h4>NOT IN with NULLs — Major Trap!</h4>
+<p>If the subquery returns ANY NULL value, <code>NOT IN</code> evaluates to UNKNOWN for every outer row, returning <strong>no results</strong>.</p>
+<pre>-- If subquery returns {1, 2, NULL}:
+-- x NOT IN {1, 2, NULL} is UNKNOWN for ALL x
+-- Use NOT EXISTS instead to be safe</pre>
+</div>
+
+<h4>EXISTS / NOT EXISTS</h4>
+<pre>-- Courses with no failing students
+SELECT c.name FROM Courses c
+WHERE NOT EXISTS (
+  SELECT 1 FROM Enrollments e
+  WHERE e.cid = c.cid AND e.grade = 'F'
+)</pre>
+<p>EXISTS returns TRUE if the subquery returns at least 1 row. NOT EXISTS returns TRUE if subquery returns 0 rows.</p>
+
+<h4>ALL / ANY</h4>
+<pre>-- Students with GPA higher than ALL CS students
+SELECT name FROM Students
+WHERE gpa > ALL (SELECT gpa FROM Students WHERE dept = 'CS')
+
+-- Students with GPA higher than ANY CS student (at least one)
+SELECT name FROM Students
+WHERE gpa > ANY (SELECT gpa FROM Students WHERE dept = 'CS')</pre>
+
+<h4>Correlated vs Uncorrelated</h4>
+<div class="concept-box">
+<p><strong>Uncorrelated</strong>: The inner query is completely independent. It runs once, produces a result, then the outer query uses it.</p>
+<p><strong>Correlated</strong>: The inner query references a column from the outer query. It must re-execute for <em>every row</em> of the outer query. Think of it like a nested for-loop.</p>
+<pre>-- Correlated: inner query uses outer's s.dept
+SELECT s.name FROM Students s
+WHERE s.gpa > (SELECT AVG(gpa) FROM Students WHERE dept = s.dept)</pre>
+</div>
+
+<h3>1.7 CTEs and Views</h3>
+<pre>-- CTE: temporary named result
+WITH HighGPA AS (
+  SELECT sid, name, gpa FROM Students WHERE gpa > 3.5
+)
+SELECT * FROM HighGPA WHERE name LIKE 'A%';
+
+-- View: stored query (virtual table)
+CREATE VIEW HighGPA AS SELECT sid, name, gpa FROM Students WHERE gpa > 3.5;
+-- Can then query: SELECT * FROM HighGPA</pre>
+<p>Views don't store data — the underlying query runs each time the view is accessed.</p>
+
+<h3>1.8 SQL Pitfalls (Commonly Tested)</h3>
+<div class="warn-box">
+<ul>
+<li><strong>Integer division</strong>: <code>5/2 = 2</code> in SQL, not 2.5. Fix: <code>CAST(5 AS FLOAT)/2</code> or <code>5 * 1.0 / 2</code></li>
+<li><strong>NULL comparisons</strong>: <code>NULL = NULL</code> is UNKNOWN, <code>NULL != 5</code> is UNKNOWN. Always use <code>IS NULL</code> or <code>IS NOT NULL</code></li>
+<li><strong>NULL in aggregates</strong>: COUNT(*) counts NULLs; COUNT(col), SUM, AVG ignore NULLs</li>
+<li><strong>DISTINCT + ORDER BY</strong>: When DISTINCT is used, ORDER BY can only reference columns in the SELECT list</li>
+<li><strong>HAVING without GROUP BY</strong>: Technically valid — treats entire table as one group</li>
+<li><strong>WHERE with aggregates</strong>: NEVER valid. <code>WHERE COUNT(*) > 5</code> is a syntax error</li>
+</ul>
+</div>
+
+<!-- ====================================================================== -->
+<h2 id="disks">2. Disks, Files &amp; Records</h2>
+<!-- ====================================================================== -->
+
+<h3>2.1 Storage Hierarchy</h3>
+<div class="concept-box">
+<p>From fastest/smallest to slowest/largest:</p>
+<p><strong>CPU Registers</strong> &rarr; <strong>L1/L2/L3 Cache</strong> &rarr; <strong>Main Memory (RAM)</strong> &rarr; <strong>SSD</strong> &rarr; <strong>HDD</strong> &rarr; <strong>Tape/Cloud</strong></p>
+<p>The DBMS manages data between RAM and disk. <strong>All data must be in RAM before the CPU can process it.</strong></p>
+</div>
+
+<h3>2.2 HDD vs SSD</h3>
+<p><strong>HDD (Hard Disk Drive)</strong>: Spinning magnetic platters with read/write heads on a moving arm. Data organized in concentric tracks, divided into sectors. Performance depends on:</p>
+<ul>
+<li><strong>Seek time</strong>: moving arm to correct track (slowest part, ~5-10ms)</li>
+<li><strong>Rotational latency</strong>: waiting for sector to spin under head (~2-4ms)</li>
+<li><strong>Transfer time</strong>: reading/writing data (fast once positioned)</li>
+</ul>
+<p><strong>SSD (Solid State Drive)</strong>: Flash memory, no moving parts. No seek time or rotational latency. Much faster random reads. Write performance limited by erase-before-write requirement.</p>
+
+<h3>2.3 Pages</h3>
+<div class="key-box">
+<p>A <strong>page</strong> (or block) is the fundamental unit of data transfer between disk and memory. Typically 4KB or 8KB.</p>
+<p><strong>You always read or write a full page</strong> — you cannot read half a page. Even if you need one record, you must read the entire page containing it.</p>
+</div>
+
+<h3>2.4 File Types</h3>
+
+<h4>Heap File</h4>
+<p>Unordered collection of pages. Records inserted wherever there's free space. No sorting.</p>
+<ul>
+<li><strong>Pros</strong>: Fast inserts (just append), simple</li>
+<li><strong>Cons</strong>: Equality search requires scanning (B/2 avg IOs)</li>
+</ul>
+<p><strong>Implementation options:</strong></p>
+<ul>
+<li><strong>Linked list</strong>: Header page with two linked lists — "full pages" and "free pages". To insert, scan free pages list for one with enough space.</li>
+<li><strong>Page directory</strong>: Header pages contain entries: (page_id, free_space_bytes). Can directly find a page with enough space. More efficient for inserts.</li>
+</ul>
+
+<h4>Sorted File</h4>
+<p>Pages maintained in sorted order by some key. Enables binary search for equality queries.</p>
+<ul>
+<li><strong>Pros</strong>: Fast equality search (log<sub>2</sub>(B) IOs), efficient range scans</li>
+<li><strong>Cons</strong>: Inserts/deletes expensive (must shift records to maintain order)</li>
+</ul>
+
+<h3>2.5 Page Layout: Slotted Pages</h3>
+<div class="concept-box">
+<p>Inside each page:</p>
+<ul>
+<li><strong>Page header</strong>: number of records, free space pointer, slot directory</li>
+<li><strong>Records</strong>: grow from the TOP of the page downward</li>
+<li><strong>Slot directory</strong>: grows from the BOTTOM of the page upward</li>
+</ul>
+<p>Each slot directory entry = (offset, length) pointing to a record in the page.</p>
+<p><strong>Why slotted pages?</strong> They support variable-length records, allow records to be moved within the page (just update the slot pointer) without changing external references, and enable compaction to reclaim space.</p>
+<p><strong>Record ID</strong> = (page_id, slot_number). This is stable even if the record moves within the page.</p>
+</div>
+
+<h3>2.6 Record Formats</h3>
+
+<h4>Fixed-Length Records</h4>
+<p>All fields have fixed size. Field i is at offset = sum of sizes of fields 0 through i-1.</p>
+<pre>Record: [field0 | field1 | field2 | field3]
+         4 bytes  4 bytes  20 bytes 4 bytes
+Field 2 offset = 4 + 4 = 8 bytes from start</pre>
+
+<h4>Variable-Length Records</h4>
+<p>Some fields (VARCHAR, TEXT) have variable size. Need a header with field offset pointers.</p>
+<pre>Header: [ptr0 | ptr1 | ptr2 | ptr3 | field0 | field1 | field2 | field3]
+Each pointer tells you where each field's data starts.</pre>
+
+<h4>Null Bitmap</h4>
+<p>Instead of storing a special NULL value for each field, use a compact bitmap: one bit per field. If bit i is set, field i is NULL (its data is not stored, saving space).</p>
+
+<h3>2.7 Record Size Calculations (Exam Favorite!)</h3>
+<div class="example-box">
+<h4>Example Calculation</h4>
+<pre>CREATE TABLE Products(
+  id INTEGER,          -- 4 bytes, always
+  name VARCHAR(10),    -- 0 to 10 bytes
+  price INTEGER,       -- 4 bytes, always
+  desc CHAR(20)        -- 20 bytes, always (CHAR is fixed!)
+);
+Header = 8 bytes
+
+Min record size = 8 + 4 + 0 + 4 + 20 = 36 bytes
+Max record size = 8 + 4 + 10 + 4 + 20 = 46 bytes</pre>
+<p><strong>Key distinction</strong>: CHAR(n) ALWAYS takes n bytes. VARCHAR(n) takes 0 to n bytes.</p>
+</div>
+
+<h4>Records Per Page Calculation</h4>
+<div class="formula-box">
+<p>For fixed-length records with bitmap:</p>
+<p>Find largest n such that: <code>n * record_size + ceil(n/8) &le; page_size - page_header</code></p>
+<p>The <code>ceil(n/8)</code> accounts for the bitmap (1 bit per slot, rounded to bytes).</p>
+</div>
+
+<!-- ====================================================================== -->
+<h2 id="io">3. IO Cost Model</h2>
+<!-- ====================================================================== -->
+
+<h3>3.1 Assumptions</h3>
+<div class="key-box">
+<ul>
+<li><strong>B</strong> = number of data pages in the file</li>
+<li><strong>R</strong> = number of records per page</li>
+<li>Only count <strong>disk I/Os</strong> (page reads + page writes)</li>
+<li>Ignore CPU cost, sequential vs random distinction, prefetching</li>
+<li>Every read or write of a page = 1 IO</li>
+<li>Data must be in memory before operating on it</li>
+</ul>
+</div>
+
+<h3>3.2 Complete IO Cost Table</h3>
+<table>
+<tr><th>Operation</th><th>Heap File</th><th>Sorted File</th></tr>
+<tr><td>Scan all records</td><td>B</td><td>B</td></tr>
+<tr><td>Equality search</td><td>B/2 average, B worst</td><td>log<sub>2</sub>(B)</td></tr>
+<tr><td>Range search</td><td>B (full scan)</td><td>log<sub>2</sub>(B) + matching pages</td></tr>
+<tr><td>Insert</td><td>2 (read last + write)</td><td>log<sub>2</sub>(B) + B + B (find + shift reads + shift writes)</td></tr>
+<tr><td>Delete</td><td>(search cost) + 1 write</td><td>log<sub>2</sub>(B) + B + B</td></tr>
+</table>
+
+<h3>3.3 Understanding Each Cost</h3>
+
+<div class="example-box">
+<h4>Heap File Insert = 2 IOs</h4>
+<p>Read the last page (1 IO) + write it back with the new record (1 IO). We always append to the end of a heap file, so we know exactly which page to read.</p>
+
+<h4>Heap File Equality Search = B/2 average</h4>
+<p>Linear scan through pages. On average, the record is halfway through the file. Worst case: B IOs (record on last page or doesn't exist).</p>
+
+<h4>Sorted File Equality = log<sub>2</sub>(B)</h4>
+<p>Binary search: read middle page, decide which half contains the key, repeat. Each step halves the search space and costs 1 IO.</p>
+
+<h4>Sorted File Insert = Very Expensive</h4>
+<p>Find the right position (log<sub>2</sub>(B) IOs), then shift all subsequent records to make room. In the worst case, this means reading and rewriting nearly all B pages.</p>
+</div>
+
+<h3>3.4 Why Indexes?</h3>
+<p>Neither heap files (slow search) nor sorted files (slow insert/delete) are great for everything. <strong>Indexes</strong> aim to give fast search (like sorted) with reasonable insert/delete costs.</p>
+
+<!-- ====================================================================== -->
+<h2 id="btree">4. B+ Trees</h2>
+<!-- ====================================================================== -->
+
+<h3>4.1 Structure</h3>
+<div class="concept-box">
+<p>A B+ tree of <strong>order d</strong> is a balanced search tree where:</p>
+<ul>
+<li>Each <strong>interior node</strong> has d to 2d keys and d+1 to 2d+1 child pointers</li>
+<li>Each <strong>leaf node</strong> has d to 2d entries (key + data pointer)</li>
+<li>The <strong>root</strong> can have 1 to 2d keys (special exception)</li>
+<li><strong>All leaves are at the same depth</strong> (perfectly balanced)</li>
+<li>Leaves are connected in a <strong>doubly-linked list</strong> for range scans</li>
+</ul>
+</div>
+
+<h3>4.2 Key Formulas</h3>
+<div class="formula-box">
+<p><strong>Max keys per node</strong> = 2d</p>
+<p><strong>Min keys per node</strong> = d (root: 1)</p>
+<p><strong>Max fanout</strong> (children of interior node) = 2d + 1</p>
+<p><strong>Min fanout</strong> = d + 1 (root: 2)</p>
+<p><strong>Max entries in height-h tree</strong> = (2d+1)<sup>h-1</sup> &times; 2d</p>
+<p><strong>Min entries in height-h tree</strong> = 2 &times; (d+1)<sup>h-2</sup> &times; d (h &ge; 2)</p>
+</div>
+
+<h3>4.3 Search</h3>
+<p>Starting at root, at each interior node:</p>
+<ol>
+<li>Find the correct child pointer by comparing your search key with the node's keys</li>
+<li>If search_key &lt; first_key, follow leftmost pointer</li>
+<li>If search_key &ge; k<sub>i</sub> and search_key &lt; k<sub>i+1</sub>, follow pointer between them</li>
+<li>If search_key &ge; last_key, follow rightmost pointer</li>
+<li>At the leaf: scan entries for the key</li>
+</ol>
+<p><strong>Cost</strong>: h IOs (h = height of tree), typically 2-3 for real databases.</p>
+
+<h3>4.4 Insert (With Splitting)</h3>
+<div class="warn-box">
+<h4>THE MOST IMPORTANT DISTINCTION ON THE EXAM:</h4>
+<p><strong>Leaf split = COPY UP</strong> the middle key (key remains in the leaf)</p>
+<p><strong>Interior split = PUSH UP</strong> the middle key (key is removed from the node)</p>
+<p>Why? Leaf nodes contain data pointers — the key MUST stay there to find the record. Interior nodes only route searches — the key can move up without losing any data.</p>
+</div>
+
+<div class="example-box">
+<h4>Insert Example: Order d=1 (max 2 keys per node)</h4>
+<p>Starting with an empty tree, insert keys: 5, 10, 15, 20, 25</p>
+
+<p><strong>Insert 5</strong>: Create root leaf [5]</p>
+<p><strong>Insert 10</strong>: Root leaf becomes [5, 10]</p>
+<p><strong>Insert 15</strong>: Leaf [5, 10, 15] overflows! Split:</p>
+<ul>
+<li>Left leaf: [5], Right leaf: [10, 15]</li>
+<li>COPY UP 10 to new root: Root = [10]</li>
+<li>Tree: [10] with children [5] and [10, 15]</li>
+</ul>
+
+<p><strong>Insert 20</strong>: Goes to right leaf [10, 15] &rarr; [10, 15, 20] overflows! Split:</p>
+<ul>
+<li>Left: [10], Right: [15, 20]</li>
+<li>COPY UP 15 to parent root: Root becomes [10, 15]</li>
+<li>Tree: [10, 15] with children [5], [10], [15, 20]</li>
+</ul>
+
+<p><strong>Insert 25</strong>: Goes to rightmost leaf [15, 20] &rarr; [15, 20, 25] overflows! Split:</p>
+<ul>
+<li>Left: [15], Right: [20, 25]</li>
+<li>COPY UP 20 to parent: Root becomes [10, 15, 20] — overflows! Root split:</li>
+<li>Interior split: PUSH UP 15. Left interior: [10], Right interior: [20]</li>
+<li>New root: [15]</li>
+</ul>
+</div>
+
+<h3>4.5 Delete (With Redistribution/Merge)</h3>
+<div class="concept-box">
+<ol>
+<li>Find the key in a leaf and remove it</li>
+<li>If leaf has &ge; d entries, done!</li>
+<li>If leaf becomes <strong>underfull</strong> (&lt; d entries):
+  <ul>
+  <li>First try: <strong>Redistribute</strong> — borrow an entry from an adjacent sibling (if sibling has &gt; d entries). Update parent key.</li>
+  <li>If can't redistribute: <strong>Merge</strong> with sibling — combine two underfull nodes into one, pull down the separating key from parent</li>
+  </ul>
+</li>
+<li>Merging may cause the parent to become underfull &rarr; cascade up</li>
+</ol>
+</div>
+
+<h3>4.6 Bulk Loading</h3>
+<div class="key-box">
+<p><strong>Why?</strong> Inserting N records one at a time = N &times; (search + possible splits) = very expensive.</p>
+<p><strong>Bulk loading algorithm:</strong></p>
+<ol>
+<li><strong>Sort</strong> all records by the search key</li>
+<li><strong>Fill</strong> leaf pages to the desired fill factor (e.g., 2/3 full, 3/4 full)</li>
+<li><strong>Build</strong> parent nodes bottom-up as leaves are filled</li>
+</ol>
+<p><strong>Fill factor calculation:</strong></p>
+<p>Entries per leaf = floor(2d &times; fill_factor)</p>
+<p>Number of leaves = ceil(total_records / entries_per_leaf)</p>
+</div>
+
+<div class="example-box">
+<h4>Bulk Loading Example</h4>
+<p>1000 records, order d=50 (max 100 entries per leaf), fill factor = 3/4</p>
+<p>Entries per leaf = floor(100 &times; 0.75) = 75</p>
+<p>Number of leaves = ceil(1000 / 75) = ceil(13.33) = 14 leaf pages</p>
+</div>
+
+<h3>4.7 Data Alternatives</h3>
+<table>
+<tr><th>Alternative</th><th>Leaf Contains</th><th>Index File = Data File?</th><th>Can be Clustered?</th></tr>
+<tr><td><strong>Alt 1</strong></td><td>Actual data records</td><td>Yes</td><td>Must be (only option)</td></tr>
+<tr><td><strong>Alt 2</strong></td><td>(key, record_id) pairs</td><td>No, separate data file</td><td>Can be either</td></tr>
+<tr><td><strong>Alt 3</strong></td><td>(key, list of record_ids)</td><td>No, separate data file</td><td>Can be either</td></tr>
+</table>
+
+<h3>4.8 Clustered vs Unclustered</h3>
+<div class="concept-box">
+<p><strong>Clustered index</strong>: The order of entries in the leaf pages matches the physical order of records on disk. This means the data file is sorted by the index key.</p>
+<ul>
+<li>Range scans are very efficient — consecutive records are on consecutive (or nearby) pages</li>
+<li>After finding the start of a range, you can sequentially scan data pages</li>
+</ul>
+
+<p><strong>Unclustered index</strong>: The order of entries in the leaf pages does NOT match physical record order. Record pointers may point to scattered pages across the disk.</p>
+<ul>
+<li>Range scans can be very expensive — each record might be on a different page</li>
+<li>In the worst case, a range query touching k records needs k IOs (one per record)</li>
+</ul>
+</div>
+
+<div class="warn-box">
+<p><strong>Only ONE clustered index per table.</strong> The data can only be physically sorted in one order. All additional indexes must be unclustered.</p>
+</div>
+
+<h3>4.9 B+ Tree IO Costs (Alt 2)</h3>
+<div class="formula-box">
+<p><strong>Equality Search (both clustered and unclustered)</strong>:</p>
+<p>&nbsp;&nbsp;height IOs (traverse tree) + 1 IO (read data page) = height + 1 IOs</p>
+
+<p><strong>Range Search — Clustered</strong>:</p>
+<p>&nbsp;&nbsp;height + num_matching_leaf_pages + num_matching_data_pages</p>
+<p>&nbsp;&nbsp;Data pages are sequential, so relatively few IOs</p>
+
+<p><strong>Range Search — Unclustered</strong>:</p>
+<p>&nbsp;&nbsp;height + num_matching_leaf_pages + up to (num_matching_records) IOs</p>
+<p>&nbsp;&nbsp;Each record might be on a different data page!</p>
+
+<p><strong>Insert</strong>: height + 1 (read data page) + 1 (write data page) + 1 (write leaf) + possible splits</p>
+</div>
+
+<h3>4.10 Composite Indexes</h3>
+<div class="key-box">
+<h4>The Prefix Rule</h4>
+<p>An index on columns (A, B, C) sorts data by A first, then by B within each A value, then by C within each (A, B) pair.</p>
+<p>The index can only be used efficiently if the query constrains a <strong>prefix</strong> of the index columns:</p>
+<table>
+<tr><th>Query Filter</th><th>Can Use Index?</th><th>Why?</th></tr>
+<tr><td>WHERE A = 5</td><td>Yes</td><td>Prefix match</td></tr>
+<tr><td>WHERE A = 5 AND B = 10</td><td>Yes</td><td>Prefix match</td></tr>
+<tr><td>WHERE A = 5 AND B = 10 AND C = 20</td><td>Yes</td><td>Full match</td></tr>
+<tr><td>WHERE B = 10</td><td>No</td><td>B is not the first column</td></tr>
+<tr><td>WHERE C = 20</td><td>No</td><td>Prefix not constrained</td></tr>
+<tr><td>WHERE B = 10 AND C = 20</td><td>No</td><td>A (prefix) not constrained</td></tr>
+<tr><td>WHERE A = 5 AND C = 20</td><td>Partially (A only)</td><td>B gap breaks the prefix</td></tr>
+</table>
+</div>
+
+<!-- ====================================================================== -->
+<h2 id="spatial">5. Spatial &amp; Vector Indexes</h2>
+<!-- ====================================================================== -->
+
+<h3>5.1 Why Needed</h3>
+<p>B+ trees work for 1D ordered data. But many queries involve multiple dimensions:</p>
+<ul>
+<li>"Find all restaurants within 1 mile of my location" (2D spatial)</li>
+<li>"Find the 10 most similar documents to my query" (high-dimensional vectors)</li>
+<li>SQL: <code>WHERE x BETWEEN 1 AND 5 AND y BETWEEN 3 AND 8</code></li>
+</ul>
+<p>A composite B+ tree index on (x, y) can filter on x but then must scan for y — not ideal.</p>
+
+<h3>5.2 KD Trees</h3>
+<div class="concept-box">
+<p>A <strong>binary search tree</strong> where each level splits on a different dimension, alternating.</p>
+<ul>
+<li>Level 0 (root): split on X</li>
+<li>Level 1: split on Y</li>
+<li>Level 2: split on X again</li>
+<li>For K dimensions: cycle through dimensions 0, 1, ..., K-1, 0, 1, ...</li>
+</ul>
+<p>Each node stores a data point. The point's coordinate in the current dimension determines the split.</p>
+<p>Space is partitioned into <strong>non-overlapping regions</strong> — every point falls in exactly one region.</p>
+</div>
+
+<h4>KD Tree Operations</h4>
+<p><strong>Search</strong>: At each node, compare the query point's value for the current dimension with the node's value. Go left if less, right if greater or equal.</p>
+
+<p><strong>Insert</strong>: Same as search — traverse to find the correct position, then add the new node.</p>
+
+<p><strong>Range Query</strong>: At each node, check if the query range intersects the node's region. If yes, recurse into both children. If no, prune that subtree.</p>
+
+<h4>Nearest Neighbor Search</h4>
+<div class="example-box">
+<p>Finding the closest point to a query point Q:</p>
+<ol>
+<li>Traverse down the tree to find the leaf region containing Q</li>
+<li>Set the current best = the point found</li>
+<li><strong>Backtrack up the tree</strong>: at each ancestor, check if the other subtree could contain a closer point</li>
+<li>Specifically: if the distance from Q to the splitting plane is less than the current best distance, search the other subtree</li>
+<li>Update best distance if a closer point is found</li>
+</ol>
+<p><strong>Application in AI</strong>: RAG (Retrieval-Augmented Generation) — documents are converted to embedding vectors, and nearest neighbor search finds the most relevant documents for a query. The LLM then generates answers using those documents as context.</p>
+</div>
+
+<h3>5.3 R-Trees</h3>
+<div class="concept-box">
+<p>An R-tree is like a <strong>B+ tree for multi-dimensional data</strong>.</p>
+<ul>
+<li><strong>Interior nodes</strong>: contain MBRs (Minimum Bounding Rectangles) — each MBR encloses all data in its subtree</li>
+<li><strong>Leaf nodes</strong>: contain actual spatial objects with their bounding boxes</li>
+<li>Balanced (all leaves at same depth), like B+ trees</li>
+<li>Has order d with fill constraints, like B+ trees</li>
+</ul>
+</div>
+
+<div class="warn-box">
+<h4>Key Difference from KD Trees</h4>
+<p>R-tree MBRs <strong>can overlap</strong>! This means a search query might need to follow multiple paths down the tree, not just one. KD tree regions are non-overlapping — each point falls in exactly one region.</p>
+</div>
+
+<h4>R-Tree Operations</h4>
+<p><strong>Search</strong>: Start at root. At each node, find all MBRs that overlap with the query region. Recurse into ALL matching children. (May follow multiple paths.)</p>
+<p><strong>Insert</strong>: Choose the subtree whose MBR needs the <strong>least expansion</strong> (smallest increase in area) to include the new object. If ties, choose the one with smallest area.</p>
+
+<h3>5.4 Comparison</h3>
+<table>
+<tr><th>Feature</th><th>KD Tree</th><th>R-Tree</th></tr>
+<tr><td>Type</td><td>Binary tree</td><td>Multi-way balanced tree (like B+)</td></tr>
+<tr><td>Regions</td><td>Non-overlapping partitions</td><td>MBRs that CAN overlap</td></tr>
+<tr><td>Splitting</td><td>Alternate dimensions at each level</td><td>MBR-based splitting</td></tr>
+<tr><td>Balanced?</td><td>Not guaranteed</td><td>Yes (guaranteed)</td></tr>
+<tr><td>Best for</td><td>Point data, nearest neighbor</td><td>Rectangles, spatial range queries</td></tr>
+<tr><td>Search paths</td><td>Single path down</td><td>May follow multiple paths (overlap)</td></tr>
+<tr><td>Disk-friendly?</td><td>Not particularly</td><td>Yes (node = page, like B+ tree)</td></tr>
+</table>
+
+<!-- ====================================================================== -->
+<h2 id="buffer">6. Buffer Management</h2>
+<!-- ====================================================================== -->
+
+<h3>6.1 Why Buffer Management?</h3>
+<p>The CPU can only work on data in RAM. Disk is slow. The <strong>buffer pool</strong> caches frequently-used disk pages in RAM to avoid repeated disk reads. The buffer manager decides which pages to keep and which to evict.</p>
+
+<h3>6.2 Buffer Pool Structure</h3>
+<div class="concept-box">
+<p>The buffer pool is a large array of <strong>frames</strong> allocated at DBMS startup. Each frame holds exactly one page.</p>
+<p>Each frame maintains three pieces of metadata:</p>
+<ul>
+<li><strong>Page ID</strong>: which disk page is currently in this frame</li>
+<li><strong>Dirty bit</strong>: has the page been modified since being read from disk?</li>
+<li><strong>Pin count</strong>: how many transactions/queries are currently using this page</li>
+</ul>
+</div>
+
+<h3>6.3 Pin and Unpin Operations</h3>
+<div class="key-box">
+<h4>Pin (Request a Page)</h4>
+<ol>
+<li>Search buffer pool for the requested page</li>
+<li><strong>If found (hit)</strong>: increment pin count, return pointer to the frame</li>
+<li><strong>If not found (miss)</strong>:
+  <ol type="a">
+  <li>Find a frame to use: either an empty frame or evict a page with pin count = 0</li>
+  <li>If the evicted page has dirty bit = 1, write it to disk first</li>
+  <li>Read the requested page from disk into the frame</li>
+  <li>Set pin count = 1, dirty bit = 0</li>
+  <li>Return pointer to the frame</li>
+  </ol>
+</li>
+</ol>
+
+<h4>Unpin (Release a Page)</h4>
+<ol>
+<li>Decrement pin count</li>
+<li>If the page was modified, the requestor tells the buffer manager to set dirty = 1</li>
+</ol>
+</div>
+
+<div class="warn-box">
+<h4>Critical Rules</h4>
+<ul>
+<li>A page with <strong>pin count &gt; 0 CANNOT be evicted</strong> — someone is still using it</li>
+<li>The <strong>requestor</strong> (not the buffer manager) sets the dirty bit</li>
+<li>If a dirty page is evicted, it <strong>must be written to disk first</strong></li>
+<li>Pin count = number of <strong>current users</strong>, not total accesses</li>
+</ul>
+</div>
+
+<h3>6.4 Replacement Policies</h3>
+
+<h4>LRU (Least Recently Used)</h4>
+<div class="concept-box">
+<p>When eviction is needed, evict the page that was accessed <strong>least recently</strong> (oldest last-access timestamp).</p>
+<p><strong>Intuition</strong>: "If you haven't been used recently, you're probably not needed soon."</p>
+<p><strong>Implementation</strong>: maintain a timestamp of last access for each frame. Evict the frame with the smallest timestamp (among those with pin count = 0).</p>
+</div>
+
+<h4>MRU (Most Recently Used)</h4>
+<div class="concept-box">
+<p>When eviction is needed, evict the page that was accessed <strong>most recently</strong> (newest last-access timestamp).</p>
+<p><strong>Intuition</strong>: "I just finished with this page, I don't need it anymore." Good for sequential access patterns where you process each page once and move on.</p>
+</div>
+
+<h4>Sequential Flooding (Why MRU beats LRU for scans)</h4>
+<div class="warn-box">
+<p><strong>Scenario</strong>: Buffer has N frames. We're sequentially scanning a file with B > N pages.</p>
+<p><strong>With LRU</strong>: Each new page evicts the oldest page. The buffer cycles through pages from the scan, and pages from other queries get evicted. Result: <strong>0 hits</strong>, every page is a miss.</p>
+<p><strong>With MRU</strong>: Each new page evicts the most recently used page (the one we just finished scanning). Earlier pages stay cached. If another query needs those earlier pages, they're still in the buffer. Result: <strong>first N-1 pages stay cached</strong>.</p>
+<p><strong>Bottom line</strong>: LRU is a good general-purpose policy but suffers from sequential flooding. MRU is better for sequential scans specifically.</p>
+</div>
+
+<h4>Clock Policy</h4>
+<div class="key-box">
+<p>An efficient approximation of LRU. PostgreSQL uses Clock with max counter = 5.</p>
+<p><strong>Structure</strong>: Frames arranged in a circle. A "clock hand" sweeps around. Each frame has a reference counter.</p>
+<p><strong>On page access</strong>: Set the reference counter (or increment, up to max).</p>
+<p><strong>On eviction (need a frame)</strong>:</p>
+<ol>
+<li>Look at the frame under the clock hand</li>
+<li>If pin count > 0: skip (can't evict), advance hand</li>
+<li>If ref counter > 0: decrement counter, advance hand (give a "second chance")</li>
+<li>If ref counter = 0: <strong>EVICT this page</strong>. Load the new page here.</li>
+</ol>
+<p>The clock hand always starts from where it stopped last time (it doesn't reset).</p>
+</div>
+
+<h3>6.5 Clock Policy Trace — Detailed Example</h3>
+<div class="example-box">
+<p><strong>Setup</strong>: 4 frames, clock hand at position 0. All frames initially empty.</p>
+<p>Access sequence: A, B, C, D, E, C, A, F</p>
+
+<p><strong>A</strong>: Empty frame 0. Load A, ref=1. Hand at 0.</p>
+<p><strong>B</strong>: Empty frame 1. Load B, ref=1. Hand at 0.</p>
+<p><strong>C</strong>: Empty frame 2. Load C, ref=1. Hand at 0.</p>
+<p><strong>D</strong>: Empty frame 3. Load D, ref=1. Hand at 0.</p>
+
+<p><strong>E</strong>: Buffer full! Need to evict. Hand at 0.</p>
+<p>&nbsp;&nbsp;Frame 0 (A, ref=1): ref-- &rarr; ref=0, advance to 1</p>
+<p>&nbsp;&nbsp;Frame 1 (B, ref=1): ref-- &rarr; ref=0, advance to 2</p>
+<p>&nbsp;&nbsp;Frame 2 (C, ref=1): ref-- &rarr; ref=0, advance to 3</p>
+<p>&nbsp;&nbsp;Frame 3 (D, ref=1): ref-- &rarr; ref=0, advance to 0</p>
+<p>&nbsp;&nbsp;Frame 0 (A, ref=0): <strong>EVICT A, load E</strong>. ref=1. Hand at 1.</p>
+<p>Buffer: [E(1), B(0), C(0), D(0)]</p>
+
+<p><strong>C</strong>: Found in frame 2! Hit. ref = 1. Hand stays at 1.</p>
+<p>Buffer: [E(1), B(0), C(1), D(0)]</p>
+
+<p><strong>A</strong>: Not in buffer. Need to evict. Hand at 1.</p>
+<p>&nbsp;&nbsp;Frame 1 (B, ref=0): <strong>EVICT B, load A</strong>. ref=1. Hand at 2.</p>
+<p>Buffer: [E(1), A(1), C(1), D(0)]</p>
+
+<p><strong>F</strong>: Not in buffer. Need to evict. Hand at 2.</p>
+<p>&nbsp;&nbsp;Frame 2 (C, ref=1): ref-- &rarr; ref=0, advance to 3</p>
+<p>&nbsp;&nbsp;Frame 3 (D, ref=0): <strong>EVICT D, load F</strong>. ref=1. Hand at 0.</p>
+<p>Buffer: [E(1), A(1), C(0), F(1)]</p>
+</div>
+
+<h3>6.6 LRU vs MRU Trace Comparison</h3>
+<div class="example-box">
+<p><strong>3 frames, Access: A B C D A B</strong></p>
+
+<p><strong>LRU Trace:</strong></p>
+<table>
+<tr><th>Access</th><th>Buffer</th><th>Evict</th><th>Hit?</th></tr>
+<tr><td>A</td><td>[A]</td><td>-</td><td>Miss</td></tr>
+<tr><td>B</td><td>[A, B]</td><td>-</td><td>Miss</td></tr>
+<tr><td>C</td><td>[A, B, C]</td><td>-</td><td>Miss</td></tr>
+<tr><td>D</td><td>[B, C, D]</td><td>A (LRU)</td><td>Miss</td></tr>
+<tr><td>A</td><td>[C, D, A]</td><td>B (LRU)</td><td>Miss</td></tr>
+<tr><td>B</td><td>[D, A, B]</td><td>C (LRU)</td><td>Miss</td></tr>
+</table>
+<p><strong>LRU: 6 misses, 0 hits</strong></p>
+
+<p><strong>MRU Trace:</strong></p>
+<table>
+<tr><th>Access</th><th>Buffer</th><th>Evict</th><th>Hit?</th></tr>
+<tr><td>A</td><td>[A]</td><td>-</td><td>Miss</td></tr>
+<tr><td>B</td><td>[A, B]</td><td>-</td><td>Miss</td></tr>
+<tr><td>C</td><td>[A, B, C]</td><td>-</td><td>Miss</td></tr>
+<tr><td>D</td><td>[A, B, D]</td><td>C (MRU)</td><td>Miss</td></tr>
+<tr><td>A</td><td>[A, B, D]</td><td>-</td><td>Hit!</td></tr>
+<tr><td>B</td><td>[A, B, D]</td><td>-</td><td>Hit!</td></tr>
+</table>
+<p><strong>MRU: 4 misses, 2 hits</strong> — MRU wins for this access pattern!</p>
+</div>
+
+<!-- ====================================================================== -->
+<h2 id="patterns">7. Exam Question Patterns</h2>
+<!-- ====================================================================== -->
+
+<h3>7.1 SQL Questions</h3>
+<div class="concept-box">
+<p><strong>Format</strong>: "Which of these queries correctly answers this question?" with 4 options.</p>
+<p><strong>Common traps</strong>:</p>
+<ul>
+<li>Aggregate in SELECT but non-aggregated column missing from GROUP BY</li>
+<li>WHERE used where HAVING is needed (or vice versa)</li>
+<li>Integer division (missing CAST to FLOAT)</li>
+<li>LEFT JOIN vs INNER JOIN — does the question need all rows from one table?</li>
+<li>NOT IN vs NOT EXISTS with NULLs</li>
+<li>Missing DISTINCT when duplicates should be removed</li>
+</ul>
+</div>
+
+<h3>7.2 Disks/Files Questions</h3>
+<div class="concept-box">
+<p><strong>Common tasks</strong>:</p>
+<ul>
+<li>Calculate min/max record sizes (watch CHAR vs VARCHAR!)</li>
+<li>Calculate records per page (account for page header, bitmap)</li>
+<li>Determine page directory vs linked list advantages</li>
+<li>Count IOs for various operations on heap vs sorted files</li>
+</ul>
+</div>
+
+<h3>7.3 B+ Tree Questions</h3>
+<div class="concept-box">
+<p><strong>Common tasks</strong>:</p>
+<ul>
+<li>Trace an insertion with splits (remember: leaf COPY UP, interior PUSH UP)</li>
+<li>"Is this a valid B+ tree?" — check order constraints, balanced depth, key ordering</li>
+<li>Bulk loading calculations with fill factor</li>
+<li>IO cost for equality/range queries on clustered vs unclustered</li>
+<li>Composite index prefix rule</li>
+</ul>
+</div>
+
+<h3>7.4 Buffer Management Questions</h3>
+<div class="concept-box">
+<p><strong>Common tasks</strong>:</p>
+<ul>
+<li>Full LRU/MRU/Clock trace on a page access sequence</li>
+<li>Count hits and misses</li>
+<li>True/False about pin count, dirty bit, eviction rules</li>
+<li>When does sequential flooding occur?</li>
+</ul>
+</div>
+
+<h3>7.5 Spatial Index Questions</h3>
+<div class="concept-box">
+<p><strong>Common tasks</strong>:</p>
+<ul>
+<li>KD tree: which dimension splits at which level?</li>
+<li>KD tree: trace a search/insert for a specific point</li>
+<li>R-tree vs KD tree: which allows overlapping regions?</li>
+<li>R-tree insertion: which subtree to choose?</li>
+<li>Nearest neighbor: when must you check the other subtree?</li>
+</ul>
+</div>
+
+</body>
+</html>

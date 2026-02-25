@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 186 Midterm 1 — Handwritten Cheat Sheet</title>
+<style>
+/* ===== PRINT-OPTIMIZED: 8.5x11 double-sided ===== */
+@page {
+  size: letter;
+  margin: 0.3in;
+}
+@media print {
+  body { background: #fff !important; color: #000 !important; font-size: 6.5pt !important; line-height: 1.18 !important; }
+  .screen-only, .no-print { display: none !important; }
+  .sheet { break-after: page; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+  .cols { column-count: 3 !important; column-gap: 8px !important; }
+  h1 { font-size: 9pt !important; margin: 0 0 2px !important; }
+  h2 { font-size: 7.5pt !important; margin: 4px 0 1px !important; padding: 1px 3px !important; }
+  h3 { font-size: 6.8pt !important; margin: 2px 0 0 !important; }
+  .box { padding: 2px 3px !important; margin: 1px 0 !important; border-width: 1px !important; }
+  p, li, td, th, code, .formula { font-size: 6.5pt !important; }
+  table { font-size: 6pt !important; }
+  code { padding: 0 1px !important; font-size: 6pt !important; }
+  ul, ol { padding-left: 10px !important; margin: 0 !important; }
+  li { margin-bottom: 0 !important; }
+  .formula { padding: 1px 3px !important; }
+}
+
+/* ===== SCREEN STYLES ===== */
+:root {
+  --bg: #0f1117; --card: #1a1d2e; --text: #e0e0e8; --muted: #8a8fa8;
+  --accent: #4A90D9; --green: #34d399; --red: #f87171; --orange: #fb923c;
+  --purple: #a78bfa; --yellow: #fbbf24; --border: #2a2d3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Courier New', 'Consolas', monospace;
+  background: var(--bg); color: var(--text);
+  line-height: 1.25; font-size: 8.5pt;
+  padding: 1rem;
+}
+.screen-only {
+  text-align: center; margin-bottom: 1rem; padding: 0.75rem;
+  background: var(--card); border-radius: 8px; border: 1px solid var(--border);
+}
+.screen-only a {
+  color: var(--accent); text-decoration: none; margin: 0 0.5rem;
+}
+.print-btn {
+  background: var(--accent); color: #fff; border: none; padding: 8px 20px;
+  border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 700;
+  margin: 0.5rem;
+}
+.print-btn:hover { opacity: 0.85; }
+
+.sheet {
+  max-width: 8.5in; margin: 0 auto 2rem;
+  background: #fff; color: #000;
+  padding: 0.3in; border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.cols { column-count: 3; column-gap: 10px; }
+h1 {
+  text-align: center; font-size: 10pt; margin-bottom: 3px;
+  border-bottom: 2px solid #000; padding-bottom: 2px;
+}
+.page-label { text-align: center; font-size: 7pt; color: #666; margin-bottom: 4px; }
+h2 {
+  font-size: 8pt; background: #000; color: #fff;
+  padding: 1px 4px; margin: 5px 0 2px; letter-spacing: 0.5px;
+  break-after: avoid;
+}
+h3 {
+  font-size: 7pt; font-weight: 700; border-bottom: 1px solid #999;
+  margin: 3px 0 1px; break-after: avoid;
+}
+.box {
+  border: 1px solid #444; padding: 2px 4px; margin: 2px 0;
+  border-radius: 2px; break-inside: avoid;
+}
+.box-alert { border-color: #c00; background: #fff0f0; }
+.box-key { border-color: #070; background: #f0fff0; }
+.box-formula { border-color: #005; background: #f0f0ff; }
+p { margin: 1px 0; }
+ul, ol { padding-left: 12px; margin: 1px 0; }
+li { margin-bottom: 0; }
+code {
+  font-family: 'Courier New', monospace; background: #eee;
+  padding: 0 2px; font-size: 7pt; border-radius: 1px;
+}
+.formula {
+  background: #f5f5ff; border: 1px solid #99c;
+  padding: 2px 4px; margin: 2px 0; font-weight: 700;
+  font-family: monospace; font-size: 7pt;
+  break-inside: avoid;
+}
+table {
+  width: 100%; border-collapse: collapse; font-size: 6.5pt;
+  margin: 2px 0; break-inside: avoid;
+}
+th, td { border: 1px solid #999; padding: 1px 3px; text-align: left; }
+th { background: #ddd; font-weight: 700; }
+.highlight { background: #ffff99; font-weight: 700; }
+.tiny { font-size: 6pt; color: #555; }
+b, strong { font-weight: 700; }
+.red { color: #c00; font-weight: 700; }
+.grn { color: #070; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="screen-only no-print">
+  <div style="margin-bottom:0.5rem">
+    <a href="index.html">Flashcards</a> |
+    <a href="study-guide.html">Study Guide</a> |
+    <strong>Cheat Sheet</strong> |
+    <a href="extended-cheatsheet.html">Extended Reference</a> |
+    <a href="practice-tests.html">Practice Tests</a>
+  </div>
+  <div>
+    <button class="print-btn" onclick="window.print()">Print Cheat Sheet (Ctrl+P)</button>
+  </div>
+  <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem">
+    Optimized for 8.5x11 double-sided printing. Use Ctrl+P, select "Save as PDF" or print directly.
+    Set margins to "Minimum" and scale to "Fit to page" for best results.
+  </p>
+</div>
+
+<!-- ==================== SIDE 1 (FRONT) ==================== -->
+<div class="sheet">
+<h1>CS 186 Midterm 1 Cheat Sheet — Spring 2026</h1>
+<p class="page-label">SIDE 1 of 2 — SQL + Disks/Files + IO Cost Model</p>
+
+<div class="cols">
+
+<!-- ========== SQL ========== -->
+<h2>1. SQL FUNDAMENTALS</h2>
+
+<h3>Query Evaluation Order</h3>
+<div class="formula">FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; SELECT &rarr; ORDER BY &rarr; LIMIT</div>
+<p class="tiny">This is LOGICAL order, not execution order. Memorize it.</p>
+
+<h3>SELECT Basics</h3>
+<ul>
+<li><code>SELECT col1, col2 FROM T WHERE cond</code></li>
+<li><code>DISTINCT</code> — removes duplicate rows</li>
+<li><code>ORDER BY col [ASC|DESC]</code> — default ASC</li>
+<li><code>LIMIT n</code> — only deterministic WITH ORDER BY</li>
+<li>Expressions: <code>SELECT price * 1.1 AS tax_price</code></li>
+</ul>
+
+<h3>Aggregates</h3>
+<div class="box">
+<p><code>COUNT(*)</code> <code>COUNT(col)</code> <code>SUM(col)</code> <code>AVG(col)</code> <code>MIN(col)</code> <code>MAX(col)</code></p>
+<p><code>COUNT(*)</code> counts all rows. <code>COUNT(col)</code> counts non-NULL values.</p>
+</div>
+
+<h3>GROUP BY Rules</h3>
+<div class="box box-alert">
+<p class="red">CRITICAL: Every non-aggregated column in SELECT MUST appear in GROUP BY.</p>
+<p>Wrong: <code>SELECT name, MAX(gpa) FROM S</code></p>
+<p>Right: <code>SELECT dept, MAX(gpa) FROM S GROUP BY dept</code></p>
+</div>
+
+<h3>WHERE vs HAVING</h3>
+<div class="box box-key">
+<p><b>WHERE</b>: filters rows <b>BEFORE</b> grouping. Cannot use aggregates.</p>
+<p><b>HAVING</b>: filters groups <b>AFTER</b> aggregation. CAN use aggregates.</p>
+</div>
+<p><code>SELECT dept, AVG(gpa) FROM S WHERE gpa > 2.0 GROUP BY dept HAVING AVG(gpa) > 3.5</code></p>
+
+<h3>Joins</h3>
+<table>
+<tr><th>Type</th><th>Result</th></tr>
+<tr><td>Cross Join</td><td>Cartesian product (m &times; n rows)</td></tr>
+<tr><td>Inner Join ON</td><td>Only matching rows from both tables</td></tr>
+<tr><td>Natural Join</td><td>Auto-matches ALL same-name columns</td></tr>
+<tr><td>LEFT OUTER JOIN</td><td>ALL left rows + NULLs for non-matches</td></tr>
+<tr><td>Self Join</td><td>Table joined with itself (use aliases)</td></tr>
+</table>
+<div class="box box-alert">
+<p class="red">LEFT JOIN trap: If left row has no match, right cols are NULL. Use IS NULL to find non-matches.</p>
+</div>
+
+<h3>Set Operations</h3>
+<table>
+<tr><th>Op</th><th>Semantics</th><th>Duplicates</th></tr>
+<tr><td>UNION</td><td>Set</td><td>Removed</td></tr>
+<tr><td>UNION ALL</td><td>Bag</td><td>Kept</td></tr>
+<tr><td>INTERSECT</td><td>Set</td><td>Removed</td></tr>
+<tr><td>EXCEPT</td><td>Set</td><td>Removed</td></tr>
+</table>
+
+<h3>Subqueries</h3>
+<ul>
+<li><b>IN</b>: <code>WHERE col IN (SELECT ...)</code></li>
+<li><b>EXISTS</b>: <code>WHERE EXISTS (SELECT 1 FROM ... WHERE ...)</code></li>
+<li><b>NOT EXISTS</b>: true when subquery returns 0 rows</li>
+<li><b>ALL</b>: <code>WHERE col > ALL (SELECT ...)</code> — true if greater than EVERY value</li>
+<li><b>ANY</b>: <code>WHERE col > ANY (SELECT ...)</code> — true if greater than at least ONE</li>
+</ul>
+<div class="box">
+<p><b>Correlated</b>: inner query references outer query column &rarr; re-runs per outer row (slow)</p>
+<p><b>Uncorrelated</b>: inner query is independent &rarr; runs once</p>
+</div>
+
+<h3>CTEs &amp; Views</h3>
+<ul>
+<li>CTE: <code>WITH name AS (SELECT ...) SELECT ... FROM name</code></li>
+<li>View: <code>CREATE VIEW name AS SELECT ...</code> — virtual table, query re-runs each use</li>
+</ul>
+
+<h3>SQL Traps from Past Exams</h3>
+<div class="box box-alert">
+<ul>
+<li>Integer division: <code>5/2 = 2</code>, use <code>CAST(x AS FLOAT)</code> or <code>x * 1.0</code></li>
+<li><code>COUNT(DISTINCT col)</code> &ne; <code>COUNT(col)</code></li>
+<li><code>NULL</code> comparisons: <code>NULL = NULL</code> is <b>UNKNOWN</b>, not TRUE. Use <code>IS NULL</code></li>
+<li><code>NOT IN</code> with NULLs: if subquery returns ANY NULL, entire NOT IN is UNKNOWN</li>
+<li><code>DISTINCT + ORDER BY</code>: ORDER BY cols must be in SELECT when DISTINCT is used</li>
+</ul>
+</div>
+
+<!-- ========== DISKS & FILES ========== -->
+<h2>2. DISKS, FILES &amp; RECORDS</h2>
+
+<h3>Storage Hierarchy</h3>
+<p>CPU Cache &rarr; RAM &rarr; SSD &rarr; HDD (fastest to slowest, smallest to largest)</p>
+
+<h3>Disk Types</h3>
+<table>
+<tr><th></th><th>HDD</th><th>SSD</th></tr>
+<tr><td>Mechanism</td><td>Spinning platters</td><td>Flash memory</td></tr>
+<tr><td>Random I/O</td><td>Slow (seek + rotation)</td><td>Fast (no moving parts)</td></tr>
+<tr><td>Sequential</td><td>Good</td><td>Good</td></tr>
+<tr><td>Cost/GB</td><td>Cheap</td><td>Expensive</td></tr>
+</table>
+
+<h3>File Types</h3>
+<div class="box">
+<p><b>Page</b> = unit of disk I/O (4KB-8KB). Always read/write full pages.</p>
+<p><b>Heap file</b> = unordered pages. Easy insert, slow search.</p>
+<p><b>Sorted file</b> = pages sorted by key. Binary search for lookup.</p>
+</div>
+
+<h3>Heap File Implementations</h3>
+<ul>
+<li><b>Linked list</b>: header page &rarr; free pages list + full pages list. Must scan free list to find space.</li>
+<li><b>Page directory</b>: header pages store (pageID, free space) entries. Can jump directly to page with space.</li>
+</ul>
+
+<h3>Page Layout: Slotted Page</h3>
+<div class="box box-key">
+<p>Records grow from TOP. Slot directory grows from BOTTOM.</p>
+<p>Slot directory = array of (offset, length) pairs for each record.</p>
+<p>Supports variable-length records + compaction.</p>
+<p>Deletion: set slot pointer to null, compact later.</p>
+</div>
+
+<h3>Record Layout</h3>
+<table>
+<tr><th>Type</th><th>Layout</th></tr>
+<tr><td>Fixed-length</td><td>Find field i at: base + sum of sizes of fields 0..i-1</td></tr>
+<tr><td>Variable-length</td><td>Header with array of field offsets (pointers)</td></tr>
+</table>
+<p><b>Null bitmap</b>: 1 bit per field. Bit set = field is NULL.</p>
+
+<h3>Record Size Calculations</h3>
+<div class="box box-formula">
+<p><b>Fixed types</b>: INTEGER = 4B, FLOAT = 4B, CHAR(n) = n bytes</p>
+<p><b>Variable types</b>: VARCHAR(n) = 0 to n bytes</p>
+<p><b>Min size</b> = header + fixed fields + VARCHAR at 0 bytes</p>
+<p><b>Max size</b> = header + fixed fields + VARCHAR at max bytes</p>
+<p><b>Records/page</b>: floor((page_size - page_overhead) / record_size)</p>
+</div>
+
+<!-- ========== IO COST MODEL ========== -->
+<h2>3. IO COST MODEL</h2>
+
+<div class="box box-key">
+<p><b>B</b> = number of pages in file</p>
+<p><b>R</b> = number of records per page</p>
+<p>Only count disk I/Os (page reads + writes). Ignore CPU, sequential vs random, prefetching.</p>
+</div>
+
+<h3>Heap File Costs</h3>
+<table>
+<tr><th>Operation</th><th>IOs</th><th>Why</th></tr>
+<tr><td>Equality search</td><td>B/2 avg, B worst</td><td>Scan until found</td></tr>
+<tr><td>Range search</td><td>B</td><td>Must scan all pages</td></tr>
+<tr><td>Insert</td><td><b>2</b></td><td>Read last page + write</td></tr>
+<tr><td>Delete</td><td>Search + 1</td><td>Find it + write back</td></tr>
+</table>
+
+<h3>Sorted File Costs</h3>
+<table>
+<tr><th>Operation</th><th>IOs</th><th>Why</th></tr>
+<tr><td>Equality search</td><td>log<sub>2</sub>(B)</td><td>Binary search</td></tr>
+<tr><td>Range search</td><td>log<sub>2</sub>(B) + match pages</td><td>Binary search + sequential</td></tr>
+<tr><td>Insert</td><td>log<sub>2</sub>(B) + B reads + B writes</td><td>Find position + shift all</td></tr>
+<tr><td>Delete</td><td>Same as insert</td><td>Must maintain sort order</td></tr>
+</table>
+
+<h3>IO Cost Comparison Summary</h3>
+<div class="formula">
+Heap: scan = B | search = B/2 | insert = 2<br>
+Sorted: search = log2(B) | range = log2(B)+pages | insert = EXPENSIVE<br>
+B+ tree: search = height | range = height + leaves (+data if unclustered)
+</div>
+
+</div><!-- end cols -->
+</div><!-- end sheet side 1 -->
+
+<!-- ==================== SIDE 2 (BACK) ==================== -->
+<div class="sheet">
+<h1>CS 186 Midterm 1 Cheat Sheet — Spring 2026</h1>
+<p class="page-label">SIDE 2 of 2 — B+ Trees + Spatial Indexes + Buffer Management</p>
+
+<div class="cols">
+
+<!-- ========== B+ TREES ========== -->
+<h2>4. B+ TREES</h2>
+
+<h3>Structure</h3>
+<div class="box box-key">
+<p><b>Order d</b>: each node has d to 2d keys (root: 1 to 2d)</p>
+<p><b>Interior nodes</b>: keys + child pointers (fanout = pointers per node)</p>
+<p><b>Leaf nodes</b>: keys + record pointers, linked as doubly-linked list</p>
+<p>All leaves at <b>same depth</b> (balanced)</p>
+</div>
+
+<h3>Key Formulas</h3>
+<div class="formula">
+Max keys/node = 2d<br>
+Min keys/node = d (root: 1)<br>
+Max fanout (interior) = 2d + 1<br>
+Min fanout (interior) = d + 1 (root: 2)<br>
+Max leaf entries = 2d<br>
+Height h tree, max entries = (2d+1)^(h-1) * 2d<br>
+</div>
+
+<h3>Search</h3>
+<p>Start at root. At each node: find correct child pointer by comparing search key. Follow pointer down. Reach leaf, scan for key.</p>
+
+<h3>Insert Algorithm</h3>
+<div class="box box-alert">
+<ol>
+<li>Search to find correct leaf</li>
+<li>Insert key into leaf</li>
+<li>If leaf overflows (> 2d entries):</li>
+</ol>
+<p>&nbsp;&nbsp;<b>Leaf split</b>: split into two leaves. <span class="red">COPY UP</span> middle key to parent.</p>
+<p>&nbsp;&nbsp;<b>Interior split</b>: split node. <span class="red">PUSH UP</span> middle key to parent.</p>
+<p class="red">CRITICAL: Leaf = COPY up (key stays in leaf). Interior = PUSH up (key removed from node).</p>
+</div>
+
+<h3>Delete Algorithm</h3>
+<div class="box">
+<ol>
+<li>Find key in leaf, remove it</li>
+<li>If leaf underfull (&lt; d entries):</li>
+</ol>
+<p>&nbsp;&nbsp;Try <b>redistribute</b> from sibling (borrow entry)</p>
+<p>&nbsp;&nbsp;If can't redistribute &rarr; <b>merge</b> with sibling + pull down parent key</p>
+<p>May cascade up. Interior key deletion: pull separator down during merge.</p>
+</div>
+
+<h3>Bulk Loading</h3>
+<div class="box box-key">
+<ol>
+<li>Sort all records by key</li>
+<li>Fill leaf pages to fill factor (e.g., 2/3 full, 3/4 full)</li>
+<li>Build parent nodes bottom-up</li>
+</ol>
+<p>Fill factor f: entries per leaf = floor(2d * f)</p>
+<p>Number of leaf pages = ceil(total_records / entries_per_leaf)</p>
+<p>Much faster than inserting one at a time!</p>
+</div>
+
+<h3>Data Alternatives</h3>
+<table>
+<tr><th>Alt</th><th>Leaf Stores</th><th>Notes</th></tr>
+<tr><td>1</td><td>Actual records</td><td>Index IS the data file. Must be clustered.</td></tr>
+<tr><td>2</td><td>(key, recordID)</td><td>Separate data file. Can be clustered or not.</td></tr>
+<tr><td>3</td><td>(key, list of recordIDs)</td><td>Compact for duplicates. Can be clustered or not.</td></tr>
+</table>
+
+<h3>Clustered vs Unclustered</h3>
+<div class="box box-alert">
+<p><b>Clustered</b>: leaf order = physical record order on disk. <span class="grn">Sequential reads for range queries.</span></p>
+<p><b>Unclustered</b>: leaf order &ne; physical order. <span class="red">Random IOs per record in range query!</span></p>
+<p class="red">Only ONE clustered index per table (data sorted one way only).</p>
+</div>
+
+<h3>B+ Tree IO Costs (Alt 2)</h3>
+<table>
+<tr><th>Operation</th><th>Clustered</th><th>Unclustered</th></tr>
+<tr><td>Equality</td><td>height + 1</td><td>height + 1</td></tr>
+<tr><td>Range (k pages match)</td><td>height + k (leaves) + k (data)</td><td>height + k (leaves) + up to k*R (1 IO per record!)</td></tr>
+<tr><td>Insert</td><td>height + 1 (read) + 1 (write leaf) + possible splits</td><td>Same</td></tr>
+</table>
+<p class="tiny">Height typically 2-3 for realistic databases. Root often cached in buffer &rarr; -1 IO.</p>
+
+<h3>Composite Index Prefix Rule</h3>
+<div class="box box-alert">
+<p>Index on <code>(A, B, C)</code>:</p>
+<p class="grn">&check; Can use for: WHERE A=x | WHERE A=x AND B=y | WHERE A=x AND B=y AND C=z</p>
+<p class="red">&cross; Cannot use for: WHERE B=y | WHERE C=z | WHERE B=y AND C=z</p>
+<p>Must constrain the <b>leftmost prefix</b> of the composite key.</p>
+</div>
+
+<!-- ========== SPATIAL INDEXES ========== -->
+<h2>5. SPATIAL &amp; VECTOR INDEXES</h2>
+
+<h3>Why Needed</h3>
+<p>B+ trees handle 1D ordered data. Multi-dimensional queries (2D points, geographic data, vector similarity) need specialized indexes.</p>
+
+<h3>KD Trees</h3>
+<div class="box box-key">
+<p><b>Binary tree</b> alternating split dimension at each level.</p>
+<p>Level 0: split on X. Level 1: split on Y. Level 2: split on X. Etc.</p>
+<p>Each node stores a data point and partitions space into non-overlapping regions.</p>
+</div>
+<p><b>Search</b>: at each node, compare query's dimension-value with node's split value. Go left if less, right if greater.</p>
+<p><b>Insert</b>: search to find position, add node.</p>
+
+<h3>KD Tree Nearest Neighbor</h3>
+<div class="box">
+<ol>
+<li>Traverse to find candidate nearest point</li>
+<li>Backtrack: at each ancestor, check if other subtree could contain closer point</li>
+<li>If distance to split plane &lt; current best distance, search other subtree too</li>
+</ol>
+<p><b>App</b>: RAG in LLMs — documents as vectors, find nearest neighbors for relevant context.</p>
+</div>
+
+<h3>R-Trees</h3>
+<div class="box box-key">
+<p><b>Like B+ trees for multi-dimensional data.</b></p>
+<p>Interior nodes contain <b>MBRs</b> (Minimum Bounding Rectangles)</p>
+<p>Leaf nodes contain actual spatial objects + bounding boxes</p>
+<p class="red">Key difference from KD: R-tree rectangles CAN OVERLAP</p>
+</div>
+
+<p><b>Search</b>: check which MBRs overlap with query region, recurse into all matching children.</p>
+<p><b>Insert</b>: choose subtree whose MBR needs <b>LEAST EXPANSION</b> (smallest area increase).</p>
+
+<h3>KD vs R-Tree Comparison</h3>
+<table>
+<tr><th></th><th>KD Tree</th><th>R-Tree</th></tr>
+<tr><td>Structure</td><td>Binary tree</td><td>Balanced (like B+ tree)</td></tr>
+<tr><td>Regions</td><td>Non-overlapping</td><td>Can overlap</td></tr>
+<tr><td>Splits</td><td>Alternating dimensions</td><td>MBR-based</td></tr>
+<tr><td>Best for</td><td>Point queries, NN</td><td>Range/region queries</td></tr>
+<tr><td>Balanced?</td><td>Not guaranteed</td><td>Yes (like B+ tree)</td></tr>
+</table>
+
+<!-- ========== BUFFER MANAGEMENT ========== -->
+<h2>6. BUFFER MANAGEMENT</h2>
+
+<h3>Buffer Pool Structure</h3>
+<div class="box box-key">
+<p>Array of <b>frames</b> in RAM. Each frame holds one page.</p>
+<p>Each frame tracks: <b>Page ID</b>, <b>Dirty Bit</b>, <b>Pin Count</b></p>
+</div>
+
+<h3>Page Operations</h3>
+<table>
+<tr><th>Op</th><th>Action</th></tr>
+<tr><td><b>Pin</b> (request)</td><td>If in buffer: pin++. If not: read from disk, pin=1. If buffer full: evict page (pin=0 only)</td></tr>
+<tr><td><b>Unpin</b> (release)</td><td>pin--. Optionally set dirty=true if page was modified.</td></tr>
+<tr><td>Eviction</td><td>Pin count MUST be 0. If dirty: write to disk first. Then replace.</td></tr>
+</table>
+
+<div class="box box-alert">
+<p class="red">Pin count > 0 means page CANNOT be evicted!</p>
+<p class="red">Dirty bit is set by the REQUESTOR on unpin, NOT by the buffer manager.</p>
+</div>
+
+<h3>Replacement Policies</h3>
+
+<p><b>LRU (Least Recently Used)</b></p>
+<ul>
+<li>Evict page whose last access is oldest</li>
+<li><span class="red">Problem: SEQUENTIAL FLOODING</span> — scanning file > buffer size evicts useful pages</li>
+</ul>
+
+<p><b>MRU (Most Recently Used)</b></p>
+<ul>
+<li>Evict page most recently accessed</li>
+<li><span class="grn">Better for sequential scans</span> — evicts just-finished page, keeps useful cached pages</li>
+</ul>
+
+<p><b>Clock Policy (Used by PostgreSQL)</b></p>
+<div class="box box-key">
+<p>Circular buffer + clock hand + reference counter per frame.</p>
+<p><b>On access</b>: set ref counter (Postgres: increment up to max 5)</p>
+<p><b>On eviction</b>:</p>
+<ol>
+<li>Look at frame under clock hand</li>
+<li>If ref > 0: decrement ref, advance hand (give second chance)</li>
+<li>If ref = 0: EVICT this page, load new page here</li>
+</ol>
+<p>Approximates LRU but cheaper to maintain.</p>
+</div>
+
+<h3>Clock Trace Example</h3>
+<div class="box">
+<p>3 frames, hand at position 0:</p>
+<p>Frame: [A(ref=1), B(ref=1), C(ref=0)]</p>
+<p>Request D (not in buffer, need to evict):</p>
+<p>Hand@0(A): ref=1 &rarr; set ref=0, advance</p>
+<p>Hand@1(B): ref=1 &rarr; set ref=0, advance</p>
+<p>Hand@2(C): ref=0 &rarr; <b>EVICT C</b>, load D, hand stays at 2 (or advances to 0)</p>
+</div>
+
+<h3>Sequential Flooding Detail</h3>
+<div class="box box-alert">
+<p>Scenario: buffer has 3 frames, scanning file with pages P1,P2,...,P10</p>
+<p>LRU: each new page evicts oldest &rarr; buffer churns through all pages &rarr; 0 hits</p>
+<p>MRU: after buffer full, each new page evicts most recent &rarr; P1,P2 stay cached &rarr; useful if accessed again by other queries</p>
+</div>
+
+<h3>Key True/False for Exams</h3>
+<div class="box">
+<ul>
+<li>Pin count = number of current users, NOT total accesses &rarr; <b>TRUE</b></li>
+<li>Buffer manager sets dirty bit &rarr; <b>FALSE</b> (requestor does)</li>
+<li>A page with pin count 0 and dirty bit can be evicted &rarr; <b>TRUE</b> (write to disk first)</li>
+<li>MRU always better than LRU &rarr; <b>FALSE</b> (MRU better for sequential, LRU better general)</li>
+<li>Clock with max ref=1 approximates LRU &rarr; <b>TRUE</b></li>
+<li>Sequential flooding happens with MRU &rarr; <b>FALSE</b> (happens with LRU)</li>
+</ul>
+</div>
+
+</div><!-- end cols -->
+</div><!-- end sheet side 2 -->
+
+<script src="chat-widget.js"></script>
+</body>
+</html>
