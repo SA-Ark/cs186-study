@@ -22,22 +22,39 @@ const OAUTH_SYSTEM_PREFIX =
 const OAUTH_BETA_HEADER =
   "oauth-2025-04-20,claude-code-20250219,interleaved-thinking-2025-05-14";
 
-const CS186_CONTEXT = `<system-context>
-You are a CS 186 (Database Systems) study assistant for UC Berkeley Spring 2026 Midterm 1.
-You ONLY answer questions about topics covered in Midterm 1:
-- SQL (SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, Joins, Subqueries, CTEs, Views)
-- Disks, Files & Records (HDD/SSD, pages, heap files, sorted files, slotted pages, record layout)
-- IO Cost Analysis (heap vs sorted file costs, B = pages, R = records/page)
-- B+ Trees (structure, search, insert with splits, delete, bulk loading, fan-out)
-- B+ Tree Advanced (clustered vs unclustered, composite indexes, prefix rule, IO costs)
-- Spatial Indexes (KD Trees, R-Trees, MBRs, nearest neighbor search)
-- Buffer Management (buffer pool, frames, dirty bit, pin count, LRU, MRU, Clock policy)
+// Load the full knowledge base at startup
+const KB_PATH = path.join(__dirname, "public", "knowledge-base.md");
+let KNOWLEDGE_BASE = "";
+try {
+  KNOWLEDGE_BASE = fs.readFileSync(KB_PATH, "utf-8");
+  console.log(`Loaded knowledge base: ${(KNOWLEDGE_BASE.length / 1024).toFixed(1)}KB`);
+} catch (err) {
+  console.warn("Knowledge base not found, using abbreviated context");
+}
 
-NOT on this midterm: Sorting/Hashing, Relational Algebra, Join Algorithms, Query Optimization.
+// Abbreviated role context (injected with every first user message)
+const CS186_ROLE = `<tutor-role>
+You are a CS 186 (Database Systems) tutor for UC Berkeley Spring 2026 Midterm 1.
+You have access to a comprehensive knowledge base (provided below) containing:
+- All lecture content (Lectures 1-8), midterm scope, study guide, cheat sheets
+- Past exam questions and solutions (Fall 2017, Spring 2018, Fall 2018) with detailed explanations
+- Flashcard content (50 concept + 40 practice cards)
+- Key formulas, IO cost tables, B+ tree algorithms, buffer management traces
 
-Be concise but thorough. Use examples when helpful. For B+ tree operations, show the tree state step by step.
-If asked about topics not on this midterm, say so and redirect to relevant topics.
-</system-context>`;
+EXAM INFO: Midterm 1 is Thu 2/26, 8-10 PM. One 8.5x11 double-sided handwritten cheat sheet allowed.
+SCOPE: SQL, Disks/Files/Records, IO Cost Model, B+ Trees, Spatial Indexes, Buffer Management.
+NOT IN SCOPE: Sorting/Hashing, Relational Algebra, Join Algorithms, Query Optimization.
+
+STUDY MATERIALS: The student has a printable cheat sheet (what they can use in-exam), an extended reference (for deep learning), flashcards with spaced repetition, and a study guide.
+
+BEHAVIOR:
+- Be concise but thorough. Use examples when helpful.
+- For B+ tree operations, show tree state step by step.
+- For IO cost questions, show your work clearly.
+- Reference past exam questions when relevant to illustrate exam patterns.
+- If asked about out-of-scope topics, say so and redirect to relevant topics.
+- When the student seems to struggle, break down the concept from fundamentals.
+</tutor-role>`;
 
 let _cachedToken = null;
 let _cachedExpiresAt = 0;
@@ -177,6 +194,7 @@ const MIME = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
   ".pdf": "application/pdf",
+  ".md": "text/markdown",
 };
 
 function serveStatic(req, res) {
@@ -224,18 +242,37 @@ async function handleChat(req, res) {
     return;
   }
 
-  // Inject CS186 context into first user message (OAuth requires fixed system prompt)
+  // Inject knowledge base + role context into first user message
+  // OAuth requires fixed system prompt, so real context goes in user message
   const injected = [...messages];
   for (let i = 0; i < injected.length; i++) {
     if (injected[i].role === "user") {
       const orig = injected[i].content;
-      injected[i] = {
-        role: "user",
-        content: [
-          { type: "text", text: CS186_CONTEXT, cache_control: { type: "ephemeral" } },
-          { type: "text", text: typeof orig === "string" ? orig : JSON.stringify(orig) },
-        ],
-      };
+      const contentBlocks = [];
+
+      // Full knowledge base (cached across turns for efficiency)
+      if (KNOWLEDGE_BASE) {
+        contentBlocks.push({
+          type: "text",
+          text: `<knowledge-base>\n${KNOWLEDGE_BASE}\n</knowledge-base>`,
+          cache_control: { type: "ephemeral" },
+        });
+      }
+
+      // Abbreviated role context
+      contentBlocks.push({
+        type: "text",
+        text: CS186_ROLE,
+        cache_control: { type: "ephemeral" },
+      });
+
+      // Actual user message
+      contentBlocks.push({
+        type: "text",
+        text: typeof orig === "string" ? orig : JSON.stringify(orig),
+      });
+
+      injected[i] = { role: "user", content: contentBlocks };
       break;
     }
   }
@@ -251,9 +288,9 @@ async function handleChat(req, res) {
 
   const apiBody = JSON.stringify({
     model: MODEL,
-    max_tokens: 2048,
+    max_tokens: 4096,
     system: OAUTH_SYSTEM_PREFIX,
-    messages: injected.slice(-20),
+    messages: injected.slice(-30),
     stream: true,
   });
 

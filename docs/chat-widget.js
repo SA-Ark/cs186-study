@@ -218,6 +218,10 @@
   var recognition = null;
   var isRecording = false;
 
+  // Conversation compression: when history exceeds this many messages, compress older ones
+  var COMPRESS_THRESHOLD = 20; // messages (10 exchanges)
+  var KEEP_RECENT = 6; // keep last 6 messages uncompressed
+
   // ——— Probe proxy availability ———
   function checkProxy() {
     if (useProxy !== null) return;
@@ -367,6 +371,36 @@
     });
   }
 
+  // Compress older conversation history into a summary
+  function compressHistory() {
+    if (conversationHistory.length <= COMPRESS_THRESHOLD) return;
+
+    var toCompress = conversationHistory.slice(0, conversationHistory.length - KEEP_RECENT);
+    var kept = conversationHistory.slice(conversationHistory.length - KEEP_RECENT);
+
+    // Build a summary of the compressed messages
+    var summaryParts = [];
+    for (var i = 0; i < toCompress.length; i++) {
+      var msg = toCompress[i];
+      var prefix = msg.role === 'user' ? 'Student' : 'Tutor';
+      var content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+      // Truncate long messages in summary
+      if (content.length > 200) content = content.substring(0, 200) + '...';
+      summaryParts.push(prefix + ': ' + content);
+    }
+
+    var summaryText = '[Earlier conversation summary — ' + toCompress.length + ' messages compressed]\n' + summaryParts.join('\n');
+
+    // Replace history with: compressed summary as first user message, then recent messages
+    conversationHistory = [
+      { role: 'user', content: summaryText },
+      { role: 'assistant', content: 'Understood, I have the context from our earlier conversation. Let\'s continue.' }
+    ].concat(kept);
+
+    // Show compression notice in UI
+    addMessage('system', 'Context compressed to save space. Recent conversation preserved.');
+  }
+
   async function sendMessage() {
     var text = input.value.trim();
     if (!text || isStreaming) return;
@@ -385,6 +419,9 @@
     sendButton.disabled = true;
     isStreaming = true;
 
+    // Compress history if too long
+    compressHistory();
+
     var assistantDiv = el('div', { className: 'chat-msg assistant' });
     var thinkingSpan = el('span', { className: 'thinking-indicator', textContent: 'Thinking' });
     assistantDiv.appendChild(thinkingSpan);
@@ -393,7 +430,7 @@
 
     try {
       var response;
-      var msgs = conversationHistory.slice(-20);
+      var msgs = conversationHistory.slice(-30);
 
       if (useProxy !== false) {
         // Try proxy first
