@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 186 — Midterm 1 Study Guide (Spring 2026)</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d2e;
+  --text: #e0e0e8;
+  --muted: #8a8fa8;
+  --accent: #4A90D9;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fb923c;
+  --purple: #a78bfa;
+  --yellow: #fbbf24;
+  --border: #2a2d3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  padding: 2rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+h1 { font-size: 2rem; text-align: center; margin-bottom: 0.25rem; color: var(--accent); }
+h2 { font-size: 1.5rem; color: var(--accent); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
+h3 { font-size: 1.2rem; color: var(--text); margin: 1.5rem 0 0.75rem; }
+h4 { font-size: 1rem; color: var(--muted); margin: 1rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+p, li { margin-bottom: 0.5rem; }
+ul, ol { padding-left: 1.5rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: #252838;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--green);
+}
+pre {
+  background: #151825;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-size: 0.88em;
+  line-height: 1.5;
+}
+pre code { background: none; padding: 0; color: var(--text); }
+.sql-kw { color: var(--accent); font-weight: bold; }
+.sql-fn { color: var(--purple); }
+.sql-str { color: var(--green); }
+.sql-num { color: var(--orange); }
+.sql-comment { color: var(--muted); font-style: italic; }
+
+/* Colored boxes */
+.box { border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; border-left: 4px solid; }
+.box-blue { background: rgba(74,144,217,0.1); border-color: var(--accent); }
+.box-green { background: rgba(52,211,153,0.1); border-color: var(--green); }
+.box-red { background: rgba(248,113,113,0.1); border-color: var(--red); }
+.box-orange { background: rgba(251,146,60,0.1); border-color: var(--orange); }
+.box-purple { background: rgba(167,139,250,0.1); border-color: var(--purple); }
+.box-title { font-weight: 700; margin-bottom: 0.5rem; display: block; }
+.box-blue .box-title { color: var(--accent); }
+.box-green .box-title { color: var(--green); }
+.box-red .box-title { color: var(--red); }
+.box-orange .box-title { color: var(--orange); }
+.box-purple .box-title { color: var(--purple); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92em; }
+th, td { padding: 0.6rem 0.8rem; border: 1px solid var(--border); text-align: left; }
+th { background: #1e2133; color: var(--accent); font-weight: 600; }
+td { background: var(--card); }
+tr:hover td { background: #22253a; }
+
+/* Details/solutions */
+details { margin: 1rem 0; }
+summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  padding: 0.5rem 0;
+  user-select: none;
+}
+summary:hover { text-decoration: underline; }
+details[open] summary { margin-bottom: 0.5rem; }
+
+/* Tree diagrams */
+.tree { display: flex; flex-direction: column; align-items: center; margin: 1.5rem 0; gap: 4px; }
+.tree-row { display: flex; gap: 8px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+.tree-node {
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: monospace;
+  font-size: 0.85em;
+  text-align: center;
+  min-width: 50px;
+  color: var(--text);
+}
+.tree-node.leaf {
+  border-color: var(--green);
+  background: rgba(52,211,153,0.08);
+}
+.tree-arrow { color: var(--muted); font-size: 0.8em; text-align: center; }
+.tree-label { font-size: 0.8em; color: var(--muted); text-align: center; margin-bottom: 4px; }
+
+/* Buffer pool diagram */
+.buffer-pool { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; margin: 1rem 0; }
+.frame {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+.frame.occupied { border-color: var(--accent); }
+.frame.dirty { border-color: var(--orange); }
+.frame-label { font-size: 0.7em; color: var(--muted); }
+
+/* TOC */
+.toc { background: var(--card); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+.toc h3 { margin-top: 0; color: var(--accent); }
+.toc ol { padding-left: 1.25rem; }
+.toc li { margin-bottom: 0.3rem; }
+
+/* Subtitle */
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 2rem; font-size: 0.95em; }
+
+/* Print button */
+.print-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 1rem auto;
+}
+.print-btn:hover { opacity: 0.85; }
+.nav-bar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.nav-bar a {
+  background: var(--card);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.9em;
+}
+
+/* KD tree coordinate grid */
+.kd-grid {
+  width: 280px; height: 280px;
+  border: 2px solid var(--border);
+  position: relative;
+  background: var(--card);
+  margin: 1rem auto;
+  border-radius: 4px;
+}
+.kd-point {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.kd-point::after {
+  content: attr(data-label);
+  position: absolute;
+  top: -18px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7em;
+  color: var(--text);
+  white-space: nowrap;
+}
+.kd-line {
+  position: absolute;
+  background: var(--muted);
+  z-index: 1;
+}
+.kd-line.vertical { width: 1px; }
+.kd-line.horizontal { height: 1px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  body { padding: 1rem 0.5rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  pre { font-size: 0.8em; padding: 0.75rem; }
+  table { font-size: 0.82em; }
+}
+
+/* Print styles */
+@media print {
+  body { background: #fff; color: #000; max-width: none; padding: 0; font-size: 11pt; }
+  .print-btn, .nav-bar { display: none; }
+  h1, h2, h3 { color: #000; }
+  h2 { border-bottom-color: #ccc; }
+  .box { break-inside: avoid; }
+  .box-blue { background: #eef4fb; }
+  .box-green { background: #eefbf5; }
+  .box-red { background: #fef2f2; }
+  .box-orange { background: #fff7ed; }
+  .box-purple { background: #f5f3ff; }
+  .box-blue .box-title { color: #1e40af; }
+  .box-green .box-title { color: #047857; }
+  .box-red .box-title { color: #b91c1c; }
+  .box-orange .box-title { color: #c2410c; }
+  .box-purple .box-title { color: #6d28d9; }
+  pre { background: #f5f5f5; border-color: #ddd; }
+  code { background: #f0f0f0; color: #1a1a1a; }
+  .toc { background: #f8f8f8; }
+  table th { background: #f0f0f0; color: #000; }
+  table td { background: #fff; }
+  .tree-node { border-color: #333; background: #f8f8f8; color: #000; }
+  .tree-node.leaf { border-color: #047857; background: #f0fdf4; }
+  .kd-grid { background: #fafafa; border-color: #ccc; }
+  .kd-point { background: #1e40af; }
+  a { color: #000; }
+}
+</style>
+</head>
+<body>
+
+<h1>CS 186 — Midterm 1 Study Guide</h1>
+<p class="subtitle">Spring 2026 &bull; Midterm: Thu 2/26, 8–10 PM &bull; Based on Lectures 1–8</p>
+
+<div class="nav-bar">
+  <a href="index.html">Flashcards</a>
+  <a href="study-guide.html">Study Guide</a>
+  <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#sql">SQL Fundamentals</a></li>
+    <li><a href="#disks">Disks, Files &amp; Records</a></li>
+    <li><a href="#io">IO Cost Analysis</a></li>
+    <li><a href="#btree">B+ Trees</a></li>
+    <li><a href="#btree-adv">B+ Tree Advanced Topics</a></li>
+    <li><a href="#spatial">Spatial Indexes</a></li>
+    <li><a href="#buffer">Buffer Management</a></li>
+    <li><a href="#practice">Practice Problems</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="sql">1. SQL Fundamentals</h2>
+
+<div class="box box-blue">
+  <span class="box-title">Key Concept: Query Evaluation Order</span>
+  SQL has a specific <strong>conceptual evaluation order</strong> — it's NOT the order you write clauses:<br><br>
+  <code>FROM</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>HAVING</code> → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>
+</div>
+
+<h3>SELECT / FROM / WHERE</h3>
+<p>The basic SQL query pattern retrieves data from tables, filters rows, and selects columns:</p>
+<pre><code><span class="sql-kw">SELECT</span> name, gpa
+<span class="sql-kw">FROM</span> Students
+<span class="sql-kw">WHERE</span> gpa > <span class="sql-num">3.5</span>
+<span class="sql-kw">ORDER BY</span> gpa <span class="sql-kw">DESC</span>
+<span class="sql-kw">LIMIT</span> <span class="sql-num">10</span>;</code></pre>
+
+<ul>
+  <li><code>DISTINCT</code> — removes duplicate rows from output</li>
+  <li><code>ORDER BY</code> — sorts output (ASC default, DESC for descending)</li>
+  <li><code>LIMIT</code> — restricts number of output rows</li>
+  <li>Deterministic output requires <strong>ORDER BY + LIMIT together</strong></li>
+</ul>
+
+<h3>Aggregates &amp; Grouping</h3>
+<p>Aggregate functions compute over sets of values:</p>
+<ul>
+  <li><code>COUNT(*)</code>, <code>COUNT(col)</code>, <code>SUM(col)</code>, <code>AVG(col)</code>, <code>MIN(col)</code>, <code>MAX(col)</code></li>
+  <li>Aggregates produce a <strong>single row</strong> of output (unless grouped)</li>
+</ul>
+
+<pre><code><span class="sql-kw">SELECT</span> dept, <span class="sql-fn">AVG</span>(gpa) <span class="sql-kw">AS</span> avg_gpa, <span class="sql-fn">COUNT</span>(*) <span class="sql-kw">AS</span> num_students
+<span class="sql-kw">FROM</span> Students
+<span class="sql-kw">GROUP BY</span> dept
+<span class="sql-kw">HAVING</span> <span class="sql-fn">COUNT</span>(*) > <span class="sql-num">5</span>;</code></pre>
+
+<div class="box box-red">
+  <span class="box-title">Common Mistake: GROUP BY Rule</span>
+  Every non-aggregated column in SELECT <strong>must</strong> appear in GROUP BY. <br>
+  <code>SELECT dept, name, AVG(gpa)</code> is <strong>INVALID</strong> without <code>GROUP BY dept, name</code>.
+</div>
+
+<div class="box box-orange">
+  <span class="box-title">WHERE vs HAVING</span>
+  <code>WHERE</code> filters rows <strong>before</strong> grouping. <code>HAVING</code> filters groups <strong>after</strong> aggregation.<br>
+  You can't use aggregates in WHERE: <code>WHERE AVG(gpa) > 3.5</code> is <strong>INVALID</strong>.
+</div>
+
+<h3>Joins</h3>
+<table>
+  <tr><th>Join Type</th><th>Syntax</th><th>Result</th></tr>
+  <tr><td>Cross Join</td><td><code>FROM A, B</code></td><td>Every combination of rows (Cartesian product)</td></tr>
+  <tr><td>Inner Join</td><td><code>FROM A JOIN B ON A.id = B.id</code></td><td>Only matching rows from both tables</td></tr>
+  <tr><td>Natural Join</td><td><code>FROM A NATURAL JOIN B</code></td><td>Match on all shared column names</td></tr>
+  <tr><td>Left Outer Join</td><td><code>FROM A LEFT JOIN B ON ...</code></td><td>All rows from A; NULLs if no match in B</td></tr>
+</table>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: LEFT JOIN</span>
+  <p>Given:</p>
+  <table>
+    <tr><th colspan="2">Students</th><th></th><th colspan="2">Enrollments</th></tr>
+    <tr><td>sid</td><td>name</td><td></td><td>sid</td><td>cid</td></tr>
+    <tr><td>1</td><td>Alice</td><td></td><td>1</td><td>CS186</td></tr>
+    <tr><td>2</td><td>Bob</td><td></td><td>1</td><td>CS162</td></tr>
+    <tr><td>3</td><td>Carol</td><td></td><td>2</td><td>CS186</td></tr>
+  </table>
+  <pre><code><span class="sql-kw">SELECT</span> S.name, E.cid
+<span class="sql-kw">FROM</span> Students S <span class="sql-kw">LEFT JOIN</span> Enrollments E <span class="sql-kw">ON</span> S.sid = E.sid;</code></pre>
+  <table>
+    <tr><th>name</th><th>cid</th></tr>
+    <tr><td>Alice</td><td>CS186</td></tr>
+    <tr><td>Alice</td><td>CS162</td></tr>
+    <tr><td>Bob</td><td>CS186</td></tr>
+    <tr><td>Carol</td><td><em>NULL</em></td></tr>
+  </table>
+  <p>Carol has no enrollments → her row is kept with NULL for cid.</p>
+</div>
+
+<h3>Set / Bag Operations</h3>
+<table>
+  <tr><th>Set (no duplicates)</th><th>Bag (allows duplicates)</th></tr>
+  <tr><td><code>UNION</code></td><td><code>UNION ALL</code></td></tr>
+  <tr><td><code>INTERSECT</code></td><td><code>INTERSECT ALL</code></td></tr>
+  <tr><td><code>EXCEPT</code></td><td><code>EXCEPT ALL</code></td></tr>
+</table>
+
+<h3>Subqueries, CTEs &amp; Views</h3>
+<pre><code><span class="sql-comment">-- Subquery with IN</span>
+<span class="sql-kw">SELECT</span> name <span class="sql-kw">FROM</span> Students
+<span class="sql-kw">WHERE</span> sid <span class="sql-kw">IN</span> (<span class="sql-kw">SELECT</span> sid <span class="sql-kw">FROM</span> Enrollments <span class="sql-kw">WHERE</span> cid = <span class="sql-str">'CS186'</span>);
+
+<span class="sql-comment">-- Same query as CTE</span>
+<span class="sql-kw">WITH</span> CS186_Students <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT</span> sid <span class="sql-kw">FROM</span> Enrollments <span class="sql-kw">WHERE</span> cid = <span class="sql-str">'CS186'</span>
+)
+<span class="sql-kw">SELECT</span> name <span class="sql-kw">FROM</span> Students
+<span class="sql-kw">WHERE</span> sid <span class="sql-kw">IN</span> (<span class="sql-kw">SELECT</span> sid <span class="sql-kw">FROM</span> CS186_Students);</code></pre>
+
+<div class="box box-blue">
+  <span class="box-title">Correlated vs Uncorrelated Subqueries</span>
+  <strong>Uncorrelated</strong>: inner query runs once, independently. <br>
+  <strong>Correlated</strong>: inner query references the outer query — runs once per outer row.
+</div>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: Evaluation Order</span>
+  <p><em>Find departments where the average GPA of students who got an 'A' in any course is above 3.5.</em></p>
+  <pre><code><span class="sql-kw">SELECT</span> S.dept, <span class="sql-fn">AVG</span>(S.gpa) <span class="sql-kw">AS</span> avg_gpa
+<span class="sql-kw">FROM</span> Students S <span class="sql-kw">JOIN</span> Enrollments E <span class="sql-kw">ON</span> S.sid = E.sid
+<span class="sql-kw">WHERE</span> E.grade = <span class="sql-str">'A'</span>
+<span class="sql-kw">GROUP BY</span> S.dept
+<span class="sql-kw">HAVING</span> <span class="sql-fn">AVG</span>(S.gpa) > <span class="sql-num">3.5</span>;</code></pre>
+  <p><strong>Step-by-step evaluation:</strong></p>
+  <ol>
+    <li><strong>FROM</strong>: Cross product of Students × Enrollments</li>
+    <li><strong>ON</strong>: Keep rows where S.sid = E.sid (inner join)</li>
+    <li><strong>WHERE</strong>: Keep only rows where grade = 'A'</li>
+    <li><strong>GROUP BY</strong>: Partition remaining rows by dept</li>
+    <li><strong>HAVING</strong>: Keep groups where AVG(gpa) > 3.5</li>
+    <li><strong>SELECT</strong>: Output dept and avg_gpa for surviving groups</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="disks">2. Disks, Files &amp; Records</h2>
+
+<h3>Storage Hierarchy</h3>
+<table>
+  <tr><th>Level</th><th>Speed</th><th>Size</th><th>Cost</th></tr>
+  <tr><td>CPU Cache</td><td>~1 ns</td><td>KB–MB</td><td>$$$$$</td></tr>
+  <tr><td>RAM (DRAM)</td><td>~100 ns</td><td>GB</td><td>$$$</td></tr>
+  <tr><td>SSD (Flash)</td><td>~100 μs</td><td>TB</td><td>$$</td></tr>
+  <tr><td>HDD (Disk)</td><td>~10 ms</td><td>TB</td><td>$</td></tr>
+</table>
+
+<div class="box box-blue">
+  <span class="box-title">Key Concept: Pages</span>
+  A <strong>page</strong> (or block) is the unit of disk I/O. Typically 4 KB. The DBMS reads/writes entire pages at a time — never individual records.
+</div>
+
+<h3>HDD Internals</h3>
+<p>Spinning disks have <strong>platters</strong> with concentric <strong>tracks</strong> divided into <strong>sectors</strong>. Access time = <strong>seek time</strong> (move arm) + <strong>rotational delay</strong> (wait for sector) + <strong>transfer time</strong> (read data). Sequential access is much faster than random access because seek + rotation are avoided.</p>
+
+<h3>File Organizations</h3>
+<table>
+  <tr><th>Type</th><th>Structure</th><th>Best For</th></tr>
+  <tr><td>Heap File</td><td>Unordered pages</td><td>Inserts (fast), full scans</td></tr>
+  <tr><td>Sorted File</td><td>Pages in sorted order</td><td>Binary search, range queries</td></tr>
+</table>
+
+<h3>Slotted Page Layout</h3>
+<div class="box box-purple">
+  <span class="box-title">Step-by-Step: How Slotted Pages Work</span>
+  <ol>
+    <li><strong>Header</strong> at the very start: stores number of slots, free space pointer</li>
+    <li><strong>Slot directory</strong> at the bottom of the page, growing upward — each slot entry stores (offset, length) of a record</li>
+    <li><strong>Records</strong> at the top of the page, growing downward</li>
+    <li><strong>Free space</strong> is in the middle between records and slot directory</li>
+    <li>To delete: remove the slot entry, compact records if desired</li>
+    <li>Supports <strong>variable-length records</strong> because slot directory stores offsets</li>
+  </ol>
+</div>
+
+<h3>Record Layout</h3>
+<ul>
+  <li><strong>Fixed-length</strong>: field offset = sum of preceding field sizes. Simple arithmetic.</li>
+  <li><strong>Variable-length</strong>: header stores offsets/pointers to each field's start location.</li>
+  <li><strong>Null bitmap</strong>: 1 bit per field — 1 if NULL, 0 if present. Compact representation.</li>
+</ul>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: Record &amp; Page Calculations</span>
+  <p><code>CREATE TABLE Products(id INTEGER, name VARCHAR(10), price FLOAT, desc CHAR(20))</code></p>
+  <p>Sizes: INTEGER = 4B, FLOAT = 4B, CHAR(20) = 20B, VARCHAR(10) = 0–10B, Header = 8B</p>
+  <p><strong>Min record size</strong> = 8 + 4 + 0 + 4 + 20 = <strong>36 bytes</strong> (VARCHAR empty)</p>
+  <p><strong>Max record size</strong> = 8 + 4 + 10 + 4 + 20 = <strong>46 bytes</strong> (VARCHAR full)</p>
+  <p>On a 1024-byte page with 12B page header and 4B per slot entry:</p>
+  <p><strong>Max records/page</strong> (using min record size): ⌊(1024 − 12) / (36 + 4)⌋ = ⌊1012 / 40⌋ = <strong>25</strong></p>
+  <p><strong>Min records/page</strong> (using max record size): ⌊1012 / (46 + 4)⌋ = ⌊1012 / 50⌋ = <strong>20</strong></p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="io">3. IO Cost Analysis</h2>
+
+<div class="box box-blue">
+  <span class="box-title">Key Concept: Cost Model Assumptions</span>
+  <ul>
+    <li>Only count <strong>disk I/Os</strong> (reads and writes)</li>
+    <li>Ignore CPU cost, ignore sequential vs. random distinction</li>
+    <li>Ignore prefetching</li>
+    <li><strong>B</strong> = number of pages in the file</li>
+    <li><strong>R</strong> = number of records per page</li>
+  </ul>
+</div>
+
+<h3>Cost Comparison Table</h3>
+<table>
+  <tr><th>Operation</th><th>Heap File</th><th>Sorted File</th></tr>
+  <tr><td>Equality Search</td><td>B/2 avg, B worst</td><td>log₂(B)</td></tr>
+  <tr><td>Range Search</td><td>B</td><td>log₂(B) + matching pages</td></tr>
+  <tr><td>Insert</td><td>2 (read + write last page)</td><td>log₂(B) + B (find + shift)</td></tr>
+  <tr><td>Delete</td><td>search + 1</td><td>log₂(B) + B (find + compact)</td></tr>
+</table>
+
+<div class="box box-red">
+  <span class="box-title">Common Mistake: Heap Insert Cost</span>
+  Heap insert is <strong>2 IOs</strong>, not 1. You must READ the last page into memory, then WRITE it back after adding the record. Always count both read and write.
+</div>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: IO Cost Comparison</span>
+  <p>A file has <strong>B = 500 pages</strong>, <strong>R = 20 records/page</strong>.</p>
+  <table>
+    <tr><th>Operation</th><th>Heap</th><th>Sorted</th></tr>
+    <tr>
+      <td>Equality search</td>
+      <td>500/2 = <strong>250 IOs</strong> avg</td>
+      <td>log₂(500) = ⌈8.97⌉ = <strong>9 IOs</strong></td>
+    </tr>
+    <tr>
+      <td>Range search (3 pages match)</td>
+      <td><strong>500 IOs</strong> (scan all)</td>
+      <td>9 + 3 = <strong>12 IOs</strong></td>
+    </tr>
+    <tr>
+      <td>Insert</td>
+      <td><strong>2 IOs</strong></td>
+      <td>9 + 500 = <strong>509 IOs</strong></td>
+    </tr>
+  </table>
+  <p>Heap is great for inserts, terrible for search. Sorted is great for search, terrible for inserts. This motivates <strong>indexes</strong> — the best of both worlds.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="btree">4. B+ Trees</h2>
+
+<div class="box box-blue">
+  <span class="box-title">Key Concept: B+ Tree Structure</span>
+  <ul>
+    <li><strong>Interior nodes</strong>: keys + pointers to children. No data.</li>
+    <li><strong>Leaf nodes</strong>: keys + pointers to actual records. Connected via doubly linked list.</li>
+    <li>All leaves at <strong>same depth</strong> (perfectly balanced).</li>
+    <li><strong>Order d</strong>: each node has [d, 2d] keys (root: [1, 2d]).</li>
+    <li><strong>Fan-out</strong>: interior node has [d+1, 2d+1] children.</li>
+  </ul>
+</div>
+
+<h3>Search</h3>
+<p>Start at root. At each node, compare search key against node's keys. Follow the appropriate pointer (left of smaller keys, right of larger). Repeat until reaching a leaf. Check if key exists in the leaf.</p>
+
+<h3>Insert Algorithm</h3>
+<div class="box box-purple">
+  <span class="box-title">Step-by-Step: B+ Tree Insert</span>
+  <ol>
+    <li>Search for the correct <strong>leaf node</strong></li>
+    <li>If leaf has space → insert the key in sorted order. Done.</li>
+    <li>If leaf is <strong>full</strong> (has 2d keys) → <strong>SPLIT</strong>:
+      <ul>
+        <li>Create new leaf, distribute keys: first d in old leaf, last d in new leaf</li>
+        <li><strong>COPY</strong> the middle key up to parent (leaf keys are copied, not moved!)</li>
+      </ul>
+    </li>
+    <li>If parent is full → split parent too:
+      <ul>
+        <li>For interior nodes, <strong>PUSH</strong> the middle key up (it moves, not copied)</li>
+      </ul>
+    </li>
+    <li>May cascade splits all the way to root → tree grows one level taller</li>
+  </ol>
+</div>
+
+<div class="box box-red">
+  <span class="box-title">CRITICAL: Copy Up vs Push Up</span>
+  <strong>Leaf split</strong>: middle key is <strong>COPIED</strong> up (it stays in the leaf too, because leaves hold actual data pointers).<br>
+  <strong>Interior split</strong>: middle key is <strong>PUSHED</strong> up (it moves out of the node entirely).<br>
+  This is the #1 most common B+ tree mistake on exams!
+</div>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: B+ Tree Insertions (d=1)</span>
+  <p>Insert: 5, 8, 1, 7, 3, 12, 9, 6. Max 2 keys per node (d=1).</p>
+
+  <p><strong>Insert 5</strong>: Tree is empty → create leaf [5]</p>
+  <p><strong>Insert 8</strong>: Leaf has space → [5, 8]</p>
+
+  <p><strong>Insert 1</strong>: Leaf is full (2 keys). Split!</p>
+  <div class="tree">
+    <div class="tree-label">Split [1,5,8] → copy 5 up</div>
+    <div class="tree-row"><div class="tree-node">[5]</div></div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;&nbsp; ↘</div>
+    <div class="tree-row">
+      <div class="tree-node leaf">[1, 5]</div>
+      <div class="tree-node leaf">[8]</div>
+    </div>
+  </div>
+
+  <p><strong>Insert 7</strong>: Goes to right leaf → [7, 8]</p>
+  <div class="tree">
+    <div class="tree-row"><div class="tree-node">[5]</div></div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;&nbsp; ↘</div>
+    <div class="tree-row">
+      <div class="tree-node leaf">[1, 5]</div>
+      <div class="tree-node leaf">[7, 8]</div>
+    </div>
+  </div>
+
+  <p><strong>Insert 3</strong>: Goes to left leaf [1, 5] — full! Split → copy 3 up.</p>
+  <div class="tree">
+    <div class="tree-row"><div class="tree-node">[3, 5]</div></div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;↓&nbsp;&nbsp; ↘</div>
+    <div class="tree-row">
+      <div class="tree-node leaf">[1, 3]</div>
+      <div class="tree-node leaf">[5]</div>
+      <div class="tree-node leaf">[7, 8]</div>
+    </div>
+  </div>
+
+  <p><strong>Insert 12</strong>: Goes to right leaf [7, 8] — full! Split → copy 8 up. Parent [3, 5] is full → split root! Push 5 up.</p>
+  <div class="tree">
+    <div class="tree-row"><div class="tree-node">[5]</div></div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+    <div class="tree-row">
+      <div class="tree-node">[3]</div>
+      <div class="tree-node">[8]</div>
+    </div>
+    <div class="tree-arrow">↙ &nbsp;↘ &nbsp;&nbsp;&nbsp;&nbsp; ↙ &nbsp;↘</div>
+    <div class="tree-row">
+      <div class="tree-node leaf">[1, 3]</div>
+      <div class="tree-node leaf">[5]</div>
+      <div class="tree-node leaf">[7, 8]</div>
+      <div class="tree-node leaf">[12]</div>
+    </div>
+  </div>
+
+  <p><strong>Insert 9</strong>: Goes to leaf [7, 8] → actually to [12] leaf? No: 9 < 12 and 9 > 8 → right of [8] pointer → leaf [12]. Wait — 9 goes to leaf containing [7,8]? Let's trace: root [5] → 9 > 5 → right child [8] → 9 > 8 → rightmost pointer → leaf [12]. Insert 9 → leaf [9, 12]. </p>
+
+  <p><strong>Insert 6</strong>: root [5] → right [8] → 6 < 8 → left pointer → leaf [5]. Leaf [5] has space → [5, 6].</p>
+
+  <p><strong>Final tree:</strong></p>
+  <div class="tree">
+    <div class="tree-row"><div class="tree-node">[5]</div></div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+    <div class="tree-row">
+      <div class="tree-node">[3]</div>
+      <div class="tree-node">[8]</div>
+    </div>
+    <div class="tree-arrow">↙ &nbsp;↘ &nbsp;&nbsp;&nbsp;&nbsp; ↙ &nbsp;↘</div>
+    <div class="tree-row">
+      <div class="tree-node leaf">[1, 3]</div>
+      <div class="tree-node leaf">[5, 6]</div>
+      <div class="tree-node leaf">[7, 8]</div>
+      <div class="tree-node leaf">[9, 12]</div>
+    </div>
+  </div>
+</div>
+
+<h3>Delete Algorithm (Brief)</h3>
+<ol>
+  <li>Find and remove the entry from the leaf</li>
+  <li>If leaf is <strong>underfull</strong> (fewer than d keys) → try <strong>redistribute</strong> from sibling</li>
+  <li>If redistribution fails → <strong>merge</strong> with sibling, pull down separator from parent</li>
+  <li>Parent may become underfull → cascade up</li>
+</ol>
+
+<h3>Bulk Loading</h3>
+<ol>
+  <li><strong>Sort</strong> all records by key</li>
+  <li>Fill leaves left to right with a <strong>fill factor</strong> (e.g., 2/3 full to leave room for inserts)</li>
+  <li>Build internal nodes <strong>bottom-up</strong></li>
+  <li>Much faster than inserting one at a time — avoids repeated root-to-leaf traversals</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="btree-adv">5. B+ Tree Advanced Topics</h2>
+
+<h3>Leaf Entry Alternatives</h3>
+<table>
+  <tr><th>Alternative</th><th>Leaf Stores</th><th>Pros</th><th>Cons</th></tr>
+  <tr><td>Alt 1</td><td>Actual records</td><td>No extra lookup; only 1 per table</td><td>Records are large → fewer per leaf</td></tr>
+  <tr><td>Alt 2</td><td>(key, record ID)</td><td>Smaller leaves, multiple indexes</td><td>Extra IO to fetch actual record</td></tr>
+  <tr><td>Alt 3</td><td>(key, list of record IDs)</td><td>Compact for many duplicates</td><td>Variable-length entries</td></tr>
+</table>
+
+<h3>Clustered vs Unclustered</h3>
+<div class="box box-blue">
+  <span class="box-title">Key Concept: Clustering</span>
+  <strong>Clustered</strong>: leaf order ≈ physical data order on disk. Built on top of a sorted file. Range scans read sequential pages.<br>
+  <strong>Unclustered</strong>: leaf order ≠ physical order. Each record pointer may go to a different page. Range scans cause random I/O.<br><br>
+  <strong>Only ONE clustered index per table</strong> — data can only be physically sorted one way.
+</div>
+
+<h3>Composite (Compound) Indexes</h3>
+<div class="box box-orange">
+  <span class="box-title">The Prefix Rule</span>
+  Index on <code>(A, B)</code> sorts by A first, then B within the same A value.
+  <ul>
+    <li>Can use for: queries on <strong>A</strong>, or <strong>A AND B</strong></li>
+    <li><strong>Cannot use</strong> for: queries on <strong>B alone</strong></li>
+  </ul>
+  Think of a phone book sorted by (last name, first name). You can look up by last name, or by both. You can't efficiently look up by first name alone.
+</div>
+
+<h3>IO Costs with B+ Trees</h3>
+<table>
+  <tr><th>Operation</th><th>Clustered (Alt 2)</th><th>Unclustered (Alt 2)</th></tr>
+  <tr><td>Equality Search</td><td>height + 1 IO</td><td>height + 1 IO</td></tr>
+  <tr><td>Range Search</td><td>height + leaf pages + data pages</td><td>height + leaf pages + up to 1 IO per matching record</td></tr>
+</table>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: Clustered vs Unclustered Range Query</span>
+  <p>Table: 100,000 records, 100 records/page → <strong>1,000 data pages</strong>. B+ tree height = 2. Query returns 500 records across 5 leaf pages.</p>
+
+  <p><strong>Clustered</strong>: 500 records at 100/page = 5 data pages (sequential!)</p>
+  <p>Cost = 2 (tree traversal) + 5 (leaf pages) + 5 (data pages) = <strong>12 IOs</strong></p>
+
+  <p><strong>Unclustered</strong>: 500 records could be on up to 500 different pages</p>
+  <p>Cost = 2 + 5 + 500 = <strong>507 IOs</strong> (worst case)</p>
+
+  <p><strong>Heap scan</strong>: 1,000 IOs. So unclustered (507) is still better than heap, but clustered (12) is dramatically better.</p>
+
+  <div class="box box-red">
+    <span class="box-title">When Unclustered Is Worse Than Heap Scan</span>
+    If the range query returns a large fraction of the table, unclustered index can be <strong>worse</strong> than a sequential heap scan. PostgreSQL's query optimizer knows this and will choose a sequential scan when it estimates the selectivity is too high.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="spatial">6. Spatial Indexes</h2>
+
+<div class="box box-blue">
+  <span class="box-title">Key Concept: Why Spatial Indexes?</span>
+  B+ trees handle 1D ordered data. For multi-dimensional queries (find all restaurants within 5 miles, find stars in a region of sky), we need spatial indexes that understand 2D+ geometry.
+</div>
+
+<h3>KD Trees (K-Dimensional Trees)</h3>
+<ul>
+  <li>Binary search tree that <strong>alternates splitting dimension</strong> at each level</li>
+  <li>Level 0: split on X, Level 1: split on Y, Level 2: split on X, ...</li>
+  <li>Each node stores a data point and partitions space into two half-planes</li>
+  <li><strong>Search</strong>: compare appropriate dimension at each level, go left or right</li>
+  <li><strong>Insert</strong>: search for position, add as new leaf</li>
+</ul>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: KD Tree Construction</span>
+  <p>Insert points: A(7,2), B(5,4), C(9,6), D(2,3), E(4,7)</p>
+
+  <p><strong>Insert A(7,2)</strong>: Root. Splits on X at x=7.</p>
+  <p><strong>Insert B(5,4)</strong>: 5 < 7 → go left. B becomes left child. Splits on Y at y=4.</p>
+  <p><strong>Insert C(9,6)</strong>: 9 > 7 → go right. C becomes right child. Splits on Y at y=6.</p>
+  <p><strong>Insert D(2,3)</strong>: 2 < 7 → left to B. 3 < 4 → go left of B. D becomes left child of B. Splits on X at x=2.</p>
+  <p><strong>Insert E(4,7)</strong>: 4 < 7 → left to B. 7 > 4 → go right of B. E becomes right child of B. Splits on X at x=4.</p>
+
+  <p><strong>Tree structure:</strong></p>
+  <div class="tree">
+    <div class="tree-label">Level 0 (split X)</div>
+    <div class="tree-row"><div class="tree-node">A(7,2)</div></div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+    <div class="tree-label">Level 1 (split Y)</div>
+    <div class="tree-row">
+      <div class="tree-node">B(5,4)</div>
+      <div class="tree-node">C(9,6)</div>
+    </div>
+    <div class="tree-arrow">↙ &nbsp;&nbsp;↘</div>
+    <div class="tree-label">Level 2 (split X)</div>
+    <div class="tree-row">
+      <div class="tree-node leaf">D(2,3)</div>
+      <div class="tree-node leaf">E(4,7)</div>
+    </div>
+  </div>
+
+  <p><strong>Space partitioning:</strong> A splits the plane vertically at x=7. Left of A, B splits horizontally at y=4. Below B, D is at (2,3). Above B, E is at (4,7). Right of A, C is at (9,6).</p>
+</div>
+
+<h3>Nearest Neighbor Search</h3>
+<div class="box box-purple">
+  <span class="box-title">Step-by-Step: KD Tree Nearest Neighbor</span>
+  <ol>
+    <li>Traverse tree as if searching for the query point — reach a leaf (candidate)</li>
+    <li>Record distance to this candidate as "best so far"</li>
+    <li><strong>Backtrack</strong>: at each parent, check if the other subtree could contain a closer point</li>
+    <li>If the perpendicular distance to the splitting plane < best distance → explore other subtree</li>
+    <li>Update best distance if a closer point is found</li>
+  </ol>
+  <p><strong>Application</strong>: RAG (Retrieval-Augmented Generation) in LLMs — documents converted to vectors, nearest neighbor finds relevant docs.</p>
+</div>
+
+<h3>R-Trees (Rectangle Trees)</h3>
+<ul>
+  <li>Like B+ trees but for multi-dimensional data — <strong>balanced</strong> (all leaves same depth)</li>
+  <li>Interior nodes contain <strong>MBRs</strong> (Minimum Bounding Rectangles) that enclose all children's objects</li>
+  <li>Leaf nodes contain actual spatial objects with their bounding boxes</li>
+  <li>MBRs <strong>can overlap</strong> — unlike KD tree partitions</li>
+</ul>
+
+<table>
+  <tr><th>Operation</th><th>How It Works</th></tr>
+  <tr><td>Search</td><td>Check which MBRs overlap with query region; recurse into those children</td></tr>
+  <tr><td>Insert</td><td>Choose child whose MBR needs the <strong>least expansion</strong> to include new object</td></tr>
+</table>
+
+<div class="box box-orange">
+  <span class="box-title">KD Trees vs R-Trees</span>
+  <table>
+    <tr><th></th><th>KD Tree</th><th>R-Tree</th></tr>
+    <tr><td>Balance</td><td>Not necessarily balanced</td><td>Balanced (like B+ tree)</td></tr>
+    <tr><td>Partitions</td><td>Non-overlapping half-planes</td><td>Overlapping MBRs</td></tr>
+    <tr><td>Data storage</td><td>Data in all nodes</td><td>Data only in leaves</td></tr>
+    <tr><td>Disk-friendly</td><td>Not really (binary tree)</td><td>Yes (high fan-out, like B+ tree)</td></tr>
+    <tr><td>Best for</td><td>In-memory spatial search</td><td>Disk-based spatial indexing</td></tr>
+  </table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="buffer">7. Buffer Management</h2>
+
+<div class="box box-blue">
+  <span class="box-title">Key Concept: Buffer Pool</span>
+  The buffer pool is a large array of <strong>frames</strong> in RAM. Each frame can hold one page. It's the bridge between disk and CPU — everything must be in the buffer pool before the CPU can process it.
+</div>
+
+<h3>Frame Metadata</h3>
+<table>
+  <tr><th>Field</th><th>Meaning</th></tr>
+  <tr><td>Page ID</td><td>Which disk page is currently in this frame</td></tr>
+  <tr><td>Dirty Bit</td><td>Has the page been modified since read from disk?</td></tr>
+  <tr><td>Pin Count</td><td>Number of queries currently using this page</td></tr>
+</table>
+
+<h3>Operations</h3>
+<ul>
+  <li><strong>Pin (request page)</strong>: If in buffer → increment pin count. If not → read from disk into a free frame, set pin count = 1.</li>
+  <li><strong>Unpin (release page)</strong>: Decrement pin count. Optionally set dirty bit.</li>
+  <li>If buffer full → must <strong>evict</strong> a page with pin count = 0. If dirty → write to disk first.</li>
+  <li>Page with pin count > 0 <strong>CANNOT be evicted</strong>.</li>
+</ul>
+
+<h3>Replacement Policies</h3>
+
+<h4>LRU (Least Recently Used)</h4>
+<p>Evict the page that was unpinned <strong>longest ago</strong>. Intuition: if you haven't used it recently, you probably won't need it soon.</p>
+
+<div class="box box-red">
+  <span class="box-title">LRU's Problem: Sequential Flooding</span>
+  When sequentially scanning a file larger than the buffer, LRU evicts the <strong>oldest page</strong> — but that's the next page you need for a repeated scan! Every access becomes a miss. LRU gives 0% hit rate for repeated sequential scans on large files.
+</div>
+
+<h4>MRU (Most Recently Used)</h4>
+<p>Evict the page that was unpinned <strong>most recently</strong>. Better for sequential scans — you just finished with that page, so evict it.</p>
+
+<h4>Clock Policy</h4>
+<div class="box box-purple">
+  <span class="box-title">Step-by-Step: Clock Replacement</span>
+  <ol>
+    <li>Frames arranged in a <strong>circle</strong> with a "clock hand" pointer</li>
+    <li>Each frame has a <strong>reference counter</strong> (set to 1 when page is pinned/accessed)</li>
+    <li>When eviction needed, the clock hand sweeps:
+      <ul>
+        <li>If pin count > 0 → <strong>skip</strong> (can't evict)</li>
+        <li>If ref counter > 0 → <strong>decrement</strong> counter, move on (second chance)</li>
+        <li>If ref counter = 0 → <strong>EVICT</strong> this page</li>
+      </ul>
+    </li>
+    <li>PostgreSQL uses Clock with max counter of 5</li>
+  </ol>
+  <p>Clock <strong>approximates LRU</strong> — recently used pages have higher counters and survive longer.</p>
+</div>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: LRU Buffer Trace</span>
+  <p>Buffer: 3 frames. Access pattern: A B C D A B C D</p>
+  <table>
+    <tr><th>Access</th><th>Frame 1</th><th>Frame 2</th><th>Frame 3</th><th>Result</th><th>Evicted</th></tr>
+    <tr><td>A</td><td><strong>A</strong></td><td>—</td><td>—</td><td>MISS</td><td>—</td></tr>
+    <tr><td>B</td><td>A</td><td><strong>B</strong></td><td>—</td><td>MISS</td><td>—</td></tr>
+    <tr><td>C</td><td>A</td><td>B</td><td><strong>C</strong></td><td>MISS</td><td>—</td></tr>
+    <tr><td>D</td><td><strong>D</strong></td><td>B</td><td>C</td><td>MISS</td><td>A (LRU)</td></tr>
+    <tr><td>A</td><td>D</td><td><strong>A</strong></td><td>C</td><td>MISS</td><td>B (LRU)</td></tr>
+    <tr><td>B</td><td>D</td><td>A</td><td><strong>B</strong></td><td>MISS</td><td>C (LRU)</td></tr>
+    <tr><td>C</td><td><strong>C</strong></td><td>A</td><td>B</td><td>MISS</td><td>D (LRU)</td></tr>
+    <tr><td>D</td><td>C</td><td><strong>D</strong></td><td>B</td><td>MISS</td><td>A (LRU)</td></tr>
+  </table>
+  <p><strong>0 hits out of 8 accesses!</strong> This is sequential flooding — the file (4 pages) is larger than the buffer (3 frames), so every repeated scan misses every time with LRU.</p>
+  <p>With <strong>MRU</strong>, after filling the buffer (A B C), accessing D would evict C (most recently used). Then accessing A → hit! B → hit! C evicts D... much better hit rate.</p>
+</div>
+
+<div class="box box-green">
+  <span class="box-title">Worked Example: Clock Trace</span>
+  <p>Buffer: 3 frames. Clock hand starts at frame 0. Access: A B C A D B</p>
+  <p>Each frame tracks: [page, ref_counter]</p>
+  <table>
+    <tr><th>Access</th><th>F0</th><th>F1</th><th>F2</th><th>Hand</th><th>Result</th></tr>
+    <tr><td>A</td><td>[A,1]</td><td>—</td><td>—</td><td>→1</td><td>MISS (empty frame)</td></tr>
+    <tr><td>B</td><td>[A,1]</td><td>[B,1]</td><td>—</td><td>→2</td><td>MISS (empty frame)</td></tr>
+    <tr><td>C</td><td>[A,1]</td><td>[B,1]</td><td>[C,1]</td><td>→0</td><td>MISS (empty frame)</td></tr>
+    <tr><td>A</td><td>[A,1]</td><td>[B,1]</td><td>[C,1]</td><td>→0</td><td>HIT (ref stays 1)</td></tr>
+    <tr><td>D</td><td colspan="3">Hand at 0: A has ref=1 → decrement to 0, advance. F1: B ref=1 → decrement to 0, advance. F2: C ref=1 → decrement to 0, advance. F0: A ref=0 → <strong>EVICT A</strong>, place D</td><td>→1</td><td>MISS</td></tr>
+    <tr><td>B</td><td>[D,1]</td><td>[B,1]</td><td>[C,0]</td><td>→1</td><td>HIT (B ref → 1)</td></tr>
+  </table>
+  <p>2 hits out of 6 accesses. Clock gave A a "second chance" by decrementing before evicting.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="practice">8. Practice Problems</h2>
+
+<h3>Problem 1: SQL</h3>
+<p>Given: <code>Books(bid, title, author, year)</code> and <code>Checkouts(bid, uid, checkout_date)</code></p>
+
+<p><strong>(a)</strong> Which query correctly finds authors whose books have been checked out more than 10 times total?</p>
+
+<p><strong>Option A:</strong></p>
+<pre><code><span class="sql-kw">SELECT</span> B.author
+<span class="sql-kw">FROM</span> Books B <span class="sql-kw">JOIN</span> Checkouts C <span class="sql-kw">ON</span> B.bid = C.bid
+<span class="sql-kw">WHERE</span> <span class="sql-fn">COUNT</span>(*) > <span class="sql-num">10</span>
+<span class="sql-kw">GROUP BY</span> B.author;</code></pre>
+
+<p><strong>Option B:</strong></p>
+<pre><code><span class="sql-kw">SELECT</span> B.author
+<span class="sql-kw">FROM</span> Books B <span class="sql-kw">JOIN</span> Checkouts C <span class="sql-kw">ON</span> B.bid = C.bid
+<span class="sql-kw">GROUP BY</span> B.author
+<span class="sql-kw">HAVING</span> <span class="sql-fn">COUNT</span>(*) > <span class="sql-num">10</span>;</code></pre>
+
+<p><strong>Option C:</strong></p>
+<pre><code><span class="sql-kw">SELECT</span> B.author, <span class="sql-fn">COUNT</span>(*) <span class="sql-kw">AS</span> cnt
+<span class="sql-kw">FROM</span> Books B, Checkouts C
+<span class="sql-kw">WHERE</span> B.bid = C.bid
+<span class="sql-kw">GROUP BY</span> B.author
+<span class="sql-kw">HAVING</span> cnt > <span class="sql-num">10</span>;</code></pre>
+
+<details>
+  <summary>Show Solution</summary>
+  <div class="box box-green">
+    <p><strong>Answer: Option B</strong></p>
+    <ul>
+      <li><strong>Option A is INVALID</strong>: You cannot use COUNT(*) in WHERE. Aggregates only work in HAVING or SELECT.</li>
+      <li><strong>Option B is CORRECT</strong>: Groups by author, then filters groups where count > 10 using HAVING.</li>
+      <li><strong>Option C is WRONG (in standard SQL)</strong>: You cannot reference a column alias (cnt) in the HAVING clause in standard SQL. Some databases (MySQL) allow this, but PostgreSQL does not. The correct HAVING would be <code>HAVING COUNT(*) > 10</code>.</li>
+    </ul>
+  </div>
+</details>
+
+<p><strong>(b)</strong> Write a query using a CTE to find the title of the most checked-out book.</p>
+<details>
+  <summary>Show Solution</summary>
+  <div class="box box-green">
+<pre><code><span class="sql-kw">WITH</span> BookCounts <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT</span> B.bid, B.title, <span class="sql-fn">COUNT</span>(*) <span class="sql-kw">AS</span> cnt
+  <span class="sql-kw">FROM</span> Books B <span class="sql-kw">JOIN</span> Checkouts C <span class="sql-kw">ON</span> B.bid = C.bid
+  <span class="sql-kw">GROUP BY</span> B.bid, B.title
+)
+<span class="sql-kw">SELECT</span> title
+<span class="sql-kw">FROM</span> BookCounts
+<span class="sql-kw">ORDER BY</span> cnt <span class="sql-kw">DESC</span>
+<span class="sql-kw">LIMIT</span> <span class="sql-num">1</span>;</code></pre>
+  </div>
+</details>
+
+<h3>Problem 2: Disks &amp; Files</h3>
+<p>A table has the following schema: <code>Employee(id INT, name CHAR(20), salary FLOAT, dept VARCHAR(15))</code></p>
+<p>INT = 4 bytes, FLOAT = 4 bytes, CHAR(n) = n bytes, VARCHAR(n) = 0 to n bytes. Record header = 8 bytes. Page size = 4096 bytes, page header = 24 bytes, slot entry = 6 bytes.</p>
+
+<p><strong>(a)</strong> What is the maximum record size?</p>
+<p><strong>(b)</strong> What is the minimum number of records that fit on one page?</p>
+<p><strong>(c)</strong> If we have 50,000 records and use the minimum packing, how many pages does the heap file need?</p>
+
+<details>
+  <summary>Show Solution</summary>
+  <div class="box box-green">
+    <p><strong>(a)</strong> Max record size = header + INT + CHAR(20) + FLOAT + VARCHAR(15 max)<br>
+    = 8 + 4 + 20 + 4 + 15 = <strong>51 bytes</strong></p>
+
+    <p><strong>(b)</strong> Usable space = 4096 − 24 = 4072 bytes<br>
+    Each record needs: 51 (record) + 6 (slot entry) = 57 bytes<br>
+    Min records = ⌊4072 / 57⌋ = <strong>71 records</strong></p>
+
+    <p><strong>(c)</strong> Pages = ⌈50000 / 71⌉ = ⌈704.2⌉ = <strong>705 pages</strong></p>
+  </div>
+</details>
+
+<h3>Problem 3: B+ Trees</h3>
+<p>Consider a B+ tree of order d=2 (max 4 keys per node) with height 3 (root at level 0, leaves at level 2).</p>
+
+<p><strong>(a)</strong> What is the maximum number of records this tree can point to (Alt 2)?</p>
+<p><strong>(b)</strong> How many IOs for an equality search on a clustered index?</p>
+<p><strong>(c)</strong> Given a B+ tree of order d=1 containing keys [2, 3, 5, 7, 8, 11, 14, 16], show the tree after inserting 6 (assume the tree is already full and balanced).</p>
+
+<details>
+  <summary>Show Solution</summary>
+  <div class="box box-green">
+    <p><strong>(a)</strong> Max keys per node = 2d = 4. Max fan-out = 2d+1 = 5.</p>
+    <p>Root: 1 node, up to 5 children<br>
+    Level 1: 5 nodes, each up to 5 children → 25 leaf nodes<br>
+    Level 2 (leaves): 25 nodes, each up to 4 keys → <strong>100 record pointers max</strong></p>
+
+    <p><strong>(b)</strong> Equality search on clustered Alt 2: traverse height of tree + 1 IO for data page<br>
+    = 3 (root + 2 internal) + 1 = <strong>4 IOs</strong><br>
+    (In practice, root is often cached, so ~3 IOs)</p>
+
+    <p><strong>(c)</strong> Inserting 6 into a full d=1 tree:</p>
+    <p>6 goes between 5 and 7. The leaf [5,7] is full → split into [5,6] and [7]. Copy 7 up to parent. If parent is full, it splits too and pushes its middle key up.</p>
+    <p>(The exact tree structure depends on the initial arrangement — draw the specific tree with [2,3,5,7,8,11,14,16] first, then perform the split.)</p>
+  </div>
+</details>
+
+<h3>Problem 4: Spatial Indexes</h3>
+<p>Insert the following points into an empty KD tree: P1(3,6), P2(7,2), P3(1,4), P4(5,8), P5(8,5).</p>
+<p><strong>(a)</strong> Draw the resulting KD tree.</p>
+<p><strong>(b)</strong> To search for a point at (6,3), which nodes would be visited?</p>
+
+<details>
+  <summary>Show Solution</summary>
+  <div class="box box-green">
+    <p><strong>(a)</strong> Building the KD tree:</p>
+    <ul>
+      <li>P1(3,6): root, split on X at x=3</li>
+      <li>P2(7,2): 7>3 → right of P1, split on Y at y=2</li>
+      <li>P3(1,4): 1<3 → left of P1, split on Y at y=4</li>
+      <li>P4(5,8): 5>3 → right to P2. 8>2 → right of P2, split on X at x=5</li>
+      <li>P5(8,5): 8>3 → right to P2. 5>2 → right to P4. 8>5 → right of P4</li>
+    </ul>
+    <div class="tree">
+      <div class="tree-label">Level 0 (X)</div>
+      <div class="tree-row"><div class="tree-node">P1(3,6)</div></div>
+      <div class="tree-arrow">↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+      <div class="tree-label">Level 1 (Y)</div>
+      <div class="tree-row">
+        <div class="tree-node">P3(1,4)</div>
+        <div class="tree-node">P2(7,2)</div>
+      </div>
+      <div class="tree-arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+      <div class="tree-label">Level 2 (X)</div>
+      <div class="tree-row">
+        <div class="tree-node" style="visibility:hidden">—</div>
+        <div class="tree-node" style="visibility:hidden">—</div>
+        <div class="tree-node">P4(5,8)</div>
+      </div>
+      <div class="tree-arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+      <div class="tree-row">
+        <div class="tree-node" style="visibility:hidden">—</div>
+        <div class="tree-node" style="visibility:hidden">—</div>
+        <div class="tree-node" style="visibility:hidden">—</div>
+        <div class="tree-node leaf">P5(8,5)</div>
+      </div>
+    </div>
+
+    <p><strong>(b)</strong> Searching for (6,3):</p>
+    <ol>
+      <li>Root P1(3,6): split X. 6 > 3 → go <strong>right</strong></li>
+      <li>P2(7,2): split Y. 3 > 2 → go <strong>right</strong></li>
+      <li>P4(5,8): split X. 6 > 5 → go <strong>right</strong></li>
+      <li>P5(8,5): leaf. (6,3) ≠ (8,5) → <strong>not found</strong></li>
+    </ol>
+    <p>Visited: P1, P2, P4, P5 (4 nodes)</p>
+  </div>
+</details>
+
+<h3>Problem 5: Buffer Management</h3>
+<p>Buffer pool with 3 frames. Access pattern: A B C D A C B D A B. Use LRU.</p>
+<p><strong>(a)</strong> Trace the buffer state and count hits/misses.</p>
+<p><strong>(b)</strong> Would MRU give more or fewer hits for this access pattern?</p>
+
+<details>
+  <summary>Show Solution</summary>
+  <div class="box box-green">
+    <p><strong>(a) LRU Trace:</strong></p>
+    <table>
+      <tr><th>Step</th><th>Access</th><th>F0</th><th>F1</th><th>F2</th><th>Hit?</th><th>Evict</th></tr>
+      <tr><td>1</td><td>A</td><td><strong>A</strong></td><td>—</td><td>—</td><td>MISS</td><td>—</td></tr>
+      <tr><td>2</td><td>B</td><td>A</td><td><strong>B</strong></td><td>—</td><td>MISS</td><td>—</td></tr>
+      <tr><td>3</td><td>C</td><td>A</td><td>B</td><td><strong>C</strong></td><td>MISS</td><td>—</td></tr>
+      <tr><td>4</td><td>D</td><td><strong>D</strong></td><td>B</td><td>C</td><td>MISS</td><td>A</td></tr>
+      <tr><td>5</td><td>A</td><td>D</td><td><strong>A</strong></td><td>C</td><td>MISS</td><td>B</td></tr>
+      <tr><td>6</td><td>C</td><td>D</td><td>A</td><td><strong>C</strong></td><td>HIT</td><td>—</td></tr>
+      <tr><td>7</td><td>B</td><td><strong>B</strong></td><td>A</td><td>C</td><td>MISS</td><td>D</td></tr>
+      <tr><td>8</td><td>D</td><td>B</td><td><strong>D</strong></td><td>C</td><td>MISS</td><td>A</td></tr>
+      <tr><td>9</td><td>A</td><td>B</td><td>D</td><td><strong>A</strong></td><td>MISS</td><td>C</td></tr>
+      <tr><td>10</td><td>B</td><td><strong>B</strong></td><td>D</td><td>A</td><td>HIT</td><td>—</td></tr>
+    </table>
+    <p><strong>2 hits, 8 misses</strong> (20% hit rate)</p>
+
+    <p><strong>(b)</strong> MRU would evict the <em>most</em> recently used page on each miss. For this pattern with 4 distinct pages and 3 frames, MRU can give slightly different results. The key insight: MRU is better when there's a <strong>repeated sequential scan</strong> pattern (A B C D A B C D...). For mixed access patterns like this one, LRU and MRU perform similarly — both struggle with a working set larger than the buffer.</p>
+  </div>
+</details>
+
+<br>
+<div style="text-align: center; padding: 2rem; color: var(--muted);">
+  <p>Good luck on the midterm! Remember: practice generating answers yourself.</p>
+  <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+</body>
+</html>
