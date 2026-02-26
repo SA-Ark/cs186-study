@@ -1,13 +1,14 @@
 /**
- * CS 186 Study Assistant — Lightweight proxy server
+ * CS 186 Study Assistant — Proxy server with persistent chat storage
  * Serves static files + proxies /api/chat to Anthropic using OAuth credentials.
- * No external dependencies — uses Node.js built-in modules only.
+ * Multi-chat support with PostgreSQL persistence for cross-device access.
  */
 
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
+const { Pool } = require("pg");
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const STATIC_DIR = path.join(__dirname, "public");
@@ -183,6 +184,106 @@ async function getAccessToken() {
   return _cachedToken;
 }
 
+// ——— PostgreSQL chat storage ———
+const DATABASE_URL = process.env.DATABASE_URL || "";
+let db = null;
+
+async function initDB() {
+  if (!DATABASE_URL) {
+    console.warn("No DATABASE_URL — chat persistence disabled");
+    return;
+  }
+  db = new Pool({ connectionString: DATABASE_URL, max: 5 });
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS chats (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL DEFAULT 'New Chat',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      chat_id INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await db.query(`CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id)`);
+  console.log("Database connected and tables ready");
+}
+
+async function readBody(req) {
+  let body = "";
+  for await (const chunk of req) body += chunk;
+  return body;
+}
+
+function jsonResponse(res, status, data) {
+  res.writeHead(status, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(data));
+}
+
+function parseUrl(reqUrl) {
+  return new URL(reqUrl, "http://localhost");
+}
+
+// ——— Chat CRUD handlers ———
+async function handleListChats(req, res) {
+  if (!db) return jsonResponse(res, 503, { error: "Database not available" });
+  const result = await db.query(
+    `SELECT c.id, c.title, c.updated_at,
+            (SELECT COUNT(*) FROM messages WHERE chat_id = c.id) as message_count
+     FROM chats c ORDER BY c.updated_at DESC`
+  );
+  jsonResponse(res, 200, { chats: result.rows });
+}
+
+async function handleCreateChat(req, res) {
+  if (!db) return jsonResponse(res, 503, { error: "Database not available" });
+  const body = JSON.parse(await readBody(req));
+  const title = body.title || "New Chat";
+  const result = await db.query(
+    "INSERT INTO chats (title) VALUES ($1) RETURNING id, title, created_at, updated_at",
+    [title]
+  );
+  jsonResponse(res, 201, result.rows[0]);
+}
+
+async function handleGetChat(req, res, chatId) {
+  if (!db) return jsonResponse(res, 503, { error: "Database not available" });
+  const chat = await db.query("SELECT * FROM chats WHERE id = $1", [chatId]);
+  if (!chat.rows.length) return jsonResponse(res, 404, { error: "Chat not found" });
+  const messages = await db.query(
+    "SELECT id, role, content, created_at FROM messages WHERE chat_id = $1 ORDER BY created_at ASC",
+    [chatId]
+  );
+  jsonResponse(res, 200, { chat: chat.rows[0], messages: messages.rows });
+}
+
+async function handleDeleteChat(req, res, chatId) {
+  if (!db) return jsonResponse(res, 503, { error: "Database not available" });
+  await db.query("DELETE FROM chats WHERE id = $1", [chatId]);
+  jsonResponse(res, 200, { ok: true });
+}
+
+async function handleUpdateChat(req, res, chatId) {
+  if (!db) return jsonResponse(res, 503, { error: "Database not available" });
+  const body = JSON.parse(await readBody(req));
+  if (body.title) {
+    await db.query("UPDATE chats SET title = $1, updated_at = NOW() WHERE id = $2", [body.title, chatId]);
+  }
+  jsonResponse(res, 200, { ok: true });
+}
+
+async function saveMessage(chatId, role, content) {
+  if (!db || !chatId) return;
+  await db.query("INSERT INTO messages (chat_id, role, content) VALUES ($1, $2, $3)", [chatId, role, content]);
+  await db.query("UPDATE chats SET updated_at = NOW() WHERE id = $1", [chatId]);
+}
+
 // MIME types for static file serving
 const MIME = {
   ".html": "text/html",
@@ -225,7 +326,6 @@ function serveStatic(req, res) {
 }
 
 async function handleChat(req, res) {
-  // Read request body
   let body = "";
   for await (const chunk of req) body += chunk;
 
@@ -233,27 +333,37 @@ async function handleChat(req, res) {
   try {
     parsed = JSON.parse(body);
   } catch {
-    res.writeHead(400, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Invalid JSON" }));
-    return;
+    return jsonResponse(res, 400, { error: "Invalid JSON" });
   }
 
   const messages = parsed.messages || [];
+  const chatId = parsed.chat_id || null;
+  const userText = parsed.user_message || "";
+
   if (!messages.length) {
-    res.writeHead(400, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "No messages" }));
-    return;
+    return jsonResponse(res, 400, { error: "No messages" });
+  }
+
+  // Save user message to DB
+  if (chatId && userText) {
+    await saveMessage(chatId, "user", userText);
+    // Auto-title on first message
+    if (db) {
+      const countRes = await db.query("SELECT COUNT(*) as c FROM messages WHERE chat_id = $1", [chatId]);
+      if (parseInt(countRes.rows[0].c) === 1) {
+        const title = userText.length > 60 ? userText.substring(0, 57) + "..." : userText;
+        await db.query("UPDATE chats SET title = $1 WHERE id = $2", [title, chatId]);
+      }
+    }
   }
 
   // Inject knowledge base + role context into first user message
-  // OAuth requires fixed system prompt, so real context goes in user message
   const injected = [...messages];
   for (let i = 0; i < injected.length; i++) {
     if (injected[i].role === "user") {
       const orig = injected[i].content;
       const contentBlocks = [];
 
-      // Full knowledge base (cached across turns for efficiency)
       if (KNOWLEDGE_BASE) {
         contentBlocks.push({
           type: "text",
@@ -262,14 +372,12 @@ async function handleChat(req, res) {
         });
       }
 
-      // Abbreviated role context
       contentBlocks.push({
         type: "text",
         text: CS186_ROLE,
         cache_control: { type: "ephemeral" },
       });
 
-      // Actual user message
       contentBlocks.push({
         type: "text",
         text: typeof orig === "string" ? orig : JSON.stringify(orig),
@@ -284,9 +392,7 @@ async function handleChat(req, res) {
   try {
     token = await getAccessToken();
   } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Auth failed: " + err.message }));
-    return;
+    return jsonResponse(res, 500, { error: "Auth failed: " + err.message });
   }
 
   const apiBody = JSON.stringify({
@@ -297,7 +403,7 @@ async function handleChat(req, res) {
     stream: true,
   });
 
-  // Stream proxy to Anthropic
+  // Stream proxy to Anthropic — buffer response to save to DB
   const apiReq = https.request(
     {
       hostname: "api.anthropic.com",
@@ -316,7 +422,35 @@ async function handleChat(req, res) {
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       });
-      apiRes.pipe(res);
+
+      let responseBuffer = "";
+
+      apiRes.on("data", (chunk) => {
+        res.write(chunk);
+        responseBuffer += chunk.toString();
+      });
+
+      apiRes.on("end", () => {
+        res.end();
+        // Extract assistant text from SSE events and save to DB
+        if (chatId && apiRes.statusCode === 200) {
+          let fullText = "";
+          const lines = responseBuffer.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.type === "content_block_delta" && data.delta && data.delta.text) {
+                  fullText += data.delta.text;
+                }
+              } catch {}
+            }
+          }
+          if (fullText) {
+            saveMessage(chatId, "assistant", fullText).catch(() => {});
+          }
+        }
+      });
     }
   );
 
@@ -334,7 +468,7 @@ async function handleChat(req, res) {
 const server = http.createServer(async (req, res) => {
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
@@ -343,31 +477,62 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === "POST" && req.url === "/api/chat") {
-    try {
+  const url = parseUrl(req.url);
+  const pathname = url.pathname;
+
+  try {
+    // Chat message proxy (existing)
+    if (req.method === "POST" && pathname === "/api/chat") {
       await handleChat(req, res);
-    } catch (err) {
-      if (!res.headersSent) {
-        res.writeHead(500, { "Content-Type": "application/json" });
-      }
-      res.end(JSON.stringify({ error: err.message }));
+      return;
     }
-    return;
-  }
 
-  // Health check
-  if (req.url === "/api/health") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true }));
-    return;
-  }
+    // Chat CRUD
+    if (pathname === "/api/chats" && req.method === "GET") {
+      await handleListChats(req, res);
+      return;
+    }
+    if (pathname === "/api/chats" && req.method === "POST") {
+      await handleCreateChat(req, res);
+      return;
+    }
 
-  serveStatic(req, res);
+    const chatMatch = pathname.match(/^\/api\/chats\/(\d+)$/);
+    if (chatMatch) {
+      const chatId = parseInt(chatMatch[1]);
+      if (req.method === "GET") { await handleGetChat(req, res, chatId); return; }
+      if (req.method === "PUT") { await handleUpdateChat(req, res, chatId); return; }
+      if (req.method === "DELETE") { await handleDeleteChat(req, res, chatId); return; }
+    }
+
+    // Health check
+    if (pathname === "/api/health") {
+      jsonResponse(res, 200, { ok: true, db: !!db });
+      return;
+    }
+
+    serveStatic(req, res);
+  } catch (err) {
+    if (!res.headersSent) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+    }
+    res.end(JSON.stringify({ error: err.message }));
+  }
 });
 
 // Bootstrap credentials from env vars if needed (for Docker/Coolify deployment)
 bootstrapCredentials();
 
-server.listen(PORT, () => {
-  console.log(`CS186 Study Assistant running on :${PORT}`);
-});
+// Initialize database then start server
+initDB()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`CS186 Study Assistant running on :${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("DB init failed (continuing without persistence):", err.message);
+    server.listen(PORT, () => {
+      console.log(`CS186 Study Assistant running on :${PORT} (no DB)`);
+    });
+  });

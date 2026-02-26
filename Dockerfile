@@ -8,6 +8,9 @@ WORKDIR /app
 # Create writable credentials directory (for OAuth token persistence)
 RUN mkdir -p /app/.credentials && chown -R node:node /app/.credentials
 
+COPY package.json .
+RUN npm install --production
+
 COPY server.js .
 COPY docs/ public/
 
