@@ -89,7 +89,7 @@
     }\
     #chat-input {\
       flex: 1; background: #12141f; color: #e0e0e8; border: 1px solid #2a2d3e;\
-      border-radius: 8px; padding: 8px 12px; font-size: 0.88em;\
+      border-radius: 8px; padding: 8px 12px; font-size: 16px;\
       font-family: inherit; resize: none; outline: none;\
       min-height: 38px; max-height: 100px;\
     }\
@@ -129,8 +129,12 @@
     #key-setup .key-save-btn:hover { background: #5ba0e9; }\
     #key-setup .key-note { font-size: 0.72em; color: #555; margin-top: 4px; }\
     @media (max-width: 500px) {\
-      #chat-panel { bottom: 80px; right: 8px; width: calc(100vw - 16px); height: calc(100vh - 100px); }\
+      #chat-panel { bottom: 0; right: 0; left: 0; width: 100vw; height: 100vh;\
+        max-width: 100vw; max-height: 100vh; border-radius: 0; border: none;\
+        box-sizing: border-box; }\
       #chat-toggle { bottom: 16px; right: 16px; width: 50px; height: 50px; }\
+      #chat-input { font-size: 16px; }\
+      #key-setup input { font-size: 16px; }\
     }\
   ';
   document.head.appendChild(css);
