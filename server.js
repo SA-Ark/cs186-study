@@ -198,7 +198,8 @@ const MIME = {
 };
 
 function serveStatic(req, res) {
-  let filePath = path.join(STATIC_DIR, req.url === "/" ? "index.html" : req.url);
+  const urlPath = new URL(req.url, "http://localhost").pathname;
+  let filePath = path.join(STATIC_DIR, urlPath === "/" ? "index.html" : urlPath);
 
   // SPA fallback: if file doesn't exist and no extension, serve index.html
   if (!fs.existsSync(filePath) && !path.extname(filePath)) {
