@@ -17,19 +17,19 @@
   var css = document.createElement('style');
   css.textContent = '\
     #chat-toggle {\
-      position: fixed; bottom: 24px; right: 24px; z-index: 9999;\
-      width: 56px; height: 56px; border-radius: 50%;\
+      position: fixed; bottom: 16px; right: 16px; z-index: 9999;\
+      width: 44px; height: 44px; border-radius: 50%;\
       background: #4A90D9; border: none; cursor: pointer;\
-      box-shadow: 0 4px 20px rgba(74,144,217,0.5);\
+      box-shadow: 0 3px 12px rgba(74,144,217,0.4);\
       display: flex; align-items: center; justify-content: center;\
       transition: transform 0.2s, box-shadow 0.2s;\
     }\
-    #chat-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(74,144,217,0.65); }\
-    #chat-toggle svg { width: 28px; height: 28px; fill: #fff; }\
+    #chat-toggle:hover { transform: scale(1.08); box-shadow: 0 4px 18px rgba(74,144,217,0.55); }\
+    #chat-toggle svg { width: 22px; height: 22px; fill: #fff; }\
     #chat-panel {\
-      position: fixed; bottom: 92px; right: 24px; z-index: 9998;\
-      width: 400px; max-width: calc(100vw - 32px);\
-      height: 520px; max-height: calc(100vh - 120px);\
+      position: fixed; bottom: 68px; right: 16px; z-index: 9998;\
+      width: 360px; max-width: calc(100vw - 32px);\
+      height: 440px; max-height: calc(100vh - 100px);\
       background: #12141f; border: 1px solid #2a2d3e;\
       border-radius: 12px; display: none; flex-direction: column;\
       box-shadow: 0 8px 40px rgba(0,0,0,0.6);\
@@ -89,7 +89,7 @@
     }\
     #chat-input {\
       flex: 1; background: #12141f; color: #e0e0e8; border: 1px solid #2a2d3e;\
-      border-radius: 8px; padding: 8px 12px; font-size: 16px;\
+      border-radius: 8px; padding: 8px 12px; font-size: 0.88em;\
       font-family: inherit; resize: none; outline: none;\
       min-height: 38px; max-height: 100px;\
     }\
@@ -129,11 +129,9 @@
     #key-setup .key-save-btn:hover { background: #5ba0e9; }\
     #key-setup .key-note { font-size: 0.72em; color: #555; margin-top: 4px; }\
     @media (max-width: 500px) {\
-      #chat-toggle { bottom: 16px; right: 16px; width: 50px; height: 50px; }\
-      #chat-input { font-size: 16px !important; }\
-      #key-setup input { font-size: 16px !important; }\
-      .chat-msg { font-size: 14px; }\
-      #chat-input-area { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }\
+      #chat-panel { bottom: 60px; right: 8px; width: calc(100vw - 16px); height: 380px; max-height: calc(100vh - 80px); }\
+      #chat-toggle { bottom: 10px; right: 10px; width: 40px; height: 40px; }\
+      #chat-toggle svg { width: 20px; height: 20px; }\
     }\
   ';
   document.head.appendChild(css);
@@ -225,99 +223,34 @@
   var COMPRESS_THRESHOLD = 20; // messages (10 exchanges)
   var KEEP_RECENT = 6; // keep last 6 messages uncompressed
 
-  // ——— Probe proxy availability (retries on failure) ———
+  // ——— Probe proxy availability ———
   function checkProxy() {
+    if (useProxy !== null) return;
     fetch('/api/health').then(function (r) {
       useProxy = r.ok;
-      if (r.ok) keySetupDiv.style.display = 'none';
     }).catch(function () {
       useProxy = false;
     });
   }
   checkProxy();
 
-  // ——— Mobile helpers ———
-  var isMobile = window.matchMedia('(max-width: 500px)').matches;
-  var savedScrollY = 0;
-
-  function setMobileSize() {
-    // Use window.innerHeight — gives actual visible viewport (excludes browser chrome/nav bar)
-    var vh = window.innerHeight;
-    chatPanel.style.height = vh + 'px';
-    chatPanel.style.maxHeight = vh + 'px';
-  }
-
-  function openChat() {
-    chatPanel.classList.add('open');
-    if (isMobile) {
-      // Lock body scroll (position:fixed trick — most reliable cross-browser)
-      savedScrollY = window.pageYOffset || document.documentElement.scrollTop;
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = '-' + savedScrollY + 'px';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-      // Force chat panel full-screen via inline styles
-      chatPanel.style.position = 'fixed';
-      chatPanel.style.top = '0';
-      chatPanel.style.left = '0';
-      chatPanel.style.width = '100%';
-      chatPanel.style.maxWidth = '100%';
-      chatPanel.style.borderRadius = '0';
-      chatPanel.style.border = 'none';
-      chatPanel.style.zIndex = '99999';
-      chatPanel.style.boxSizing = 'border-box';
-      setMobileSize();
-      // Update height when browser chrome shows/hides (address bar, keyboard)
-      window.addEventListener('resize', setMobileSize);
-    }
-    // Only show key setup if proxy is confirmed down AND no saved key
-    // Re-check proxy first in case it recovered
-    if (useProxy === false && !apiKey) {
-      checkProxy();
-      // Give proxy check 500ms before deciding
-      setTimeout(function () {
-        if (useProxy === false && !apiKey) {
-          keySetupDiv.style.display = 'flex';
-          keyInput.focus();
-        } else {
-          keySetupDiv.style.display = 'none';
-          input.focus();
-        }
-      }, 500);
-    } else {
-      keySetupDiv.style.display = 'none';
-      input.focus();
-    }
-  }
-
-  function closeChat() {
-    chatPanel.classList.remove('open');
-    if (isMobile) {
-      window.removeEventListener('resize', setMobileSize);
-      // Clear all inline styles on panel
-      chatPanel.style.cssText = '';
-      // Unlock body and restore scroll position
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      window.scrollTo(0, savedScrollY);
-    }
-  }
-
   // ——— Toggle panel ———
   toggleBtn.addEventListener('click', function () {
+    chatPanel.classList.toggle('open');
     if (chatPanel.classList.contains('open')) {
-      closeChat();
-    } else {
-      openChat();
+      // Only show key setup if proxy is definitely unavailable AND no key stored
+      if (useProxy === false && !apiKey) {
+        keySetupDiv.style.display = 'flex';
+        keyInput.focus();
+      } else {
+        keySetupDiv.style.display = 'none';
+        input.focus();
+      }
     }
   });
-  document.getElementById('chat-close').addEventListener('click', closeChat);
+  document.getElementById('chat-close').addEventListener('click', function () {
+    chatPanel.classList.remove('open');
+  });
 
   // ——— Key setup (fallback for static hosting) ———
   document.getElementById('key-save').addEventListener('click', function () {
@@ -404,8 +337,14 @@
       body: JSON.stringify({ messages: messages }),
     }).then(function (response) {
       if (!response.ok) {
-        return response.json().catch(function () { return {}; }).then(function (err) {
-          throw new Error(err.error || ('API error: ' + response.status));
+        return response.text().then(function (text) {
+          try {
+            var err = JSON.parse(text);
+            throw new Error(err.error || ('API error: ' + response.status));
+          } catch (e) {
+            if (e.message && e.message.indexOf('API error') !== -1) throw e;
+            throw new Error('Server error (' + response.status + '). Try again in a moment.');
+          }
         });
       }
       return response;
@@ -473,6 +412,13 @@
     var text = input.value.trim();
     if (!text || isStreaming) return;
 
+    // Check if we can send
+    if (useProxy === false && !apiKey) {
+      keySetupDiv.style.display = 'flex';
+      keyInput.focus();
+      return;
+    }
+
     addMessage('user', text);
     conversationHistory.push({ role: 'user', content: text });
     input.value = '';
@@ -493,18 +439,22 @@
       var response;
       var msgs = conversationHistory.slice(-30);
 
-      // Always try proxy first (it may have recovered since last check)
-      try {
-        response = await sendViaProxy(msgs);
-        useProxy = true;
-      } catch (proxyErr) {
-        // Proxy failed — fall back to direct API if we have a key
-        useProxy = false;
-        if (apiKey) {
-          response = await sendDirect(msgs);
-        } else {
-          throw new Error('Service temporarily unavailable. Please try again in a moment.');
+      if (useProxy !== false) {
+        // Try proxy first
+        try {
+          response = await sendViaProxy(msgs);
+          useProxy = true;
+        } catch (proxyErr) {
+          // Proxy failed — fall back to direct API if we have a key
+          if (apiKey) {
+            response = await sendDirect(msgs);
+          } else {
+            useProxy = false;
+            throw proxyErr;
+          }
         }
+      } else {
+        response = await sendDirect(msgs);
       }
 
       // Stream the response
@@ -551,8 +501,14 @@
       assistantDiv.textContent = 'Error: ' + fetchErr.message;
       assistantDiv.className = 'chat-msg system';
       conversationHistory.pop();
-      // Re-probe proxy in background (it may recover)
-      checkProxy();
+
+      if (fetchErr.message.indexOf('401') !== -1 || fetchErr.message.indexOf('invalid') !== -1) {
+        localStorage.removeItem(LS_KEY);
+        apiKey = '';
+        if (useProxy === false) {
+          keySetupDiv.style.display = 'flex';
+        }
+      }
     } finally {
       isStreaming = false;
       sendButton.disabled = false;
@@ -589,9 +545,7 @@
     recognition.onerror = function (e) {
       isRecording = false;
       voiceButton.classList.remove('recording');
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-        voiceButton.style.display = 'none';
-      } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      if (e.error !== 'no-speech') {
         addMessage('system', 'Voice error: ' + e.error);
       }
     };
@@ -607,6 +561,11 @@
       }
     });
   } else {
-    voiceButton.style.display = 'none';
+    voiceButton.style.opacity = '0.3';
+    voiceButton.style.cursor = 'not-allowed';
+    voiceButton.title = 'Voice not supported in this browser';
+    voiceButton.addEventListener('click', function () {
+      addMessage('system', 'Voice input is not supported in this browser. Try Chrome on desktop or Android.');
+    });
   }
 })();

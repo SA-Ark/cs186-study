@@ -17,19 +17,19 @@
   var css = document.createElement('style');
   css.textContent = '\
     #chat-toggle {\
-      position: fixed; bottom: 24px; right: 24px; z-index: 9999;\
-      width: 56px; height: 56px; border-radius: 50%;\
+      position: fixed; bottom: 16px; right: 16px; z-index: 9999;\
+      width: 44px; height: 44px; border-radius: 50%;\
       background: #4A90D9; border: none; cursor: pointer;\
-      box-shadow: 0 4px 20px rgba(74,144,217,0.5);\
+      box-shadow: 0 3px 12px rgba(74,144,217,0.4);\
       display: flex; align-items: center; justify-content: center;\
       transition: transform 0.2s, box-shadow 0.2s;\
     }\
-    #chat-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(74,144,217,0.65); }\
-    #chat-toggle svg { width: 28px; height: 28px; fill: #fff; }\
+    #chat-toggle:hover { transform: scale(1.08); box-shadow: 0 4px 18px rgba(74,144,217,0.55); }\
+    #chat-toggle svg { width: 22px; height: 22px; fill: #fff; }\
     #chat-panel {\
-      position: fixed; bottom: 92px; right: 24px; z-index: 9998;\
-      width: 400px; max-width: calc(100vw - 32px);\
-      height: 520px; max-height: calc(100vh - 120px);\
+      position: fixed; bottom: 68px; right: 16px; z-index: 9998;\
+      width: 360px; max-width: calc(100vw - 32px);\
+      height: 440px; max-height: calc(100vh - 100px);\
       background: #12141f; border: 1px solid #2a2d3e;\
       border-radius: 12px; display: none; flex-direction: column;\
       box-shadow: 0 8px 40px rgba(0,0,0,0.6);\
@@ -129,8 +129,9 @@
     #key-setup .key-save-btn:hover { background: #5ba0e9; }\
     #key-setup .key-note { font-size: 0.72em; color: #555; margin-top: 4px; }\
     @media (max-width: 500px) {\
-      #chat-panel { bottom: 80px; right: 8px; width: calc(100vw - 16px); height: calc(100vh - 100px); }\
-      #chat-toggle { bottom: 16px; right: 16px; width: 50px; height: 50px; }\
+      #chat-panel { bottom: 60px; right: 8px; width: calc(100vw - 16px); height: 380px; max-height: calc(100vh - 80px); }\
+      #chat-toggle { bottom: 10px; right: 10px; width: 40px; height: 40px; }\
+      #chat-toggle svg { width: 20px; height: 20px; }\
     }\
   ';
   document.head.appendChild(css);
@@ -336,8 +337,14 @@
       body: JSON.stringify({ messages: messages }),
     }).then(function (response) {
       if (!response.ok) {
-        return response.json().catch(function () { return {}; }).then(function (err) {
-          throw new Error(err.error || ('API error: ' + response.status));
+        return response.text().then(function (text) {
+          try {
+            var err = JSON.parse(text);
+            throw new Error(err.error || ('API error: ' + response.status));
+          } catch (e) {
+            if (e.message && e.message.indexOf('API error') !== -1) throw e;
+            throw new Error('Server error (' + response.status + '). Try again in a moment.');
+          }
         });
       }
       return response;
@@ -554,6 +561,11 @@
       }
     });
   } else {
-    voiceButton.style.display = 'none';
+    voiceButton.style.opacity = '0.3';
+    voiceButton.style.cursor = 'not-allowed';
+    voiceButton.title = 'Voice not supported in this browser';
+    voiceButton.addEventListener('click', function () {
+      addMessage('system', 'Voice input is not supported in this browser. Try Chrome on desktop or Android.');
+    });
   }
 })();
