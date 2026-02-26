@@ -1,23 +1,32 @@
 name: Purge Cloudflare Cache
 
 on:
-  workflow_run:
-    workflows: ["pages build and deployment"]
-    types: [completed]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   purge:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
     steps:
+      - name: Wait for GitHub Pages to deploy
+        run: sleep 45
+
       - name: Purge Cloudflare cache
         env:
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_EMAIL: ${{ secrets.CF_EMAIL }}
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
         run: |
-          curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
+          RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
             -H "X-Auth-Email: ${CF_EMAIL}" \
             -H "X-Auth-Key: ${CF_API_KEY}" \
             -H "Content-Type: application/json" \
-            --data '{"purge_everything":true}'
+            --data '{"purge_everything":true}')
+          echo "$RESULT"
+          if echo "$RESULT" | grep -q '"success":true'; then
+            echo "Cache purged successfully"
+          else
+            echo "Cache purge may have failed"
+            exit 1
+          fi
