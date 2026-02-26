@@ -24,7 +24,7 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"purge_everything":true}')
           echo "$RESULT"
-          if echo "$RESULT" | grep -q '"success":true'; then
+          if echo "$RESULT" | grep -q '"success": true'; then
             echo "Cache purged successfully"
           else
             echo "Cache purge may have failed"
