@@ -133,6 +133,7 @@
       #chat-input { font-size: 16px !important; }\
       #key-setup input { font-size: 16px !important; }\
       .chat-msg { font-size: 14px; }\
+      #chat-input-area { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }\
     }\
   ';
   document.head.appendChild(css);
@@ -239,6 +240,13 @@
   var isMobile = window.matchMedia('(max-width: 500px)').matches;
   var savedScrollY = 0;
 
+  function setMobileSize() {
+    // Use window.innerHeight — gives actual visible viewport (excludes browser chrome/nav bar)
+    var vh = window.innerHeight;
+    chatPanel.style.height = vh + 'px';
+    chatPanel.style.maxHeight = vh + 'px';
+  }
+
   function openChat() {
     chatPanel.classList.add('open');
     if (isMobile) {
@@ -250,20 +258,19 @@
       document.body.style.left = '0';
       document.body.style.right = '0';
       document.body.style.width = '100%';
-      // Force chat panel full-screen via inline styles (max specificity, no CSS compat issues)
+      // Force chat panel full-screen via inline styles
       chatPanel.style.position = 'fixed';
       chatPanel.style.top = '0';
       chatPanel.style.left = '0';
-      chatPanel.style.right = '0';
-      chatPanel.style.bottom = '0';
       chatPanel.style.width = '100%';
-      chatPanel.style.height = '100%';
-      chatPanel.style.maxWidth = 'none';
-      chatPanel.style.maxHeight = 'none';
+      chatPanel.style.maxWidth = '100%';
       chatPanel.style.borderRadius = '0';
       chatPanel.style.border = 'none';
       chatPanel.style.zIndex = '99999';
       chatPanel.style.boxSizing = 'border-box';
+      setMobileSize();
+      // Update height when browser chrome shows/hides (address bar, keyboard)
+      window.addEventListener('resize', setMobileSize);
     }
     if (useProxy === false && !apiKey) {
       keySetupDiv.style.display = 'flex';
@@ -277,6 +284,7 @@
   function closeChat() {
     chatPanel.classList.remove('open');
     if (isMobile) {
+      window.removeEventListener('resize', setMobileSize);
       // Clear all inline styles on panel
       chatPanel.style.cssText = '';
       // Unlock body and restore scroll position
