@@ -129,9 +129,9 @@
     #key-setup .key-save-btn:hover { background: #5ba0e9; }\
     #key-setup .key-note { font-size: 0.72em; color: #555; margin-top: 4px; }\
     @media (max-width: 500px) {\
-      #chat-panel { bottom: 0; right: 0; left: 0; width: 100vw; height: 100vh;\
-        max-width: 100vw; max-height: 100vh; border-radius: 0; border: none;\
-        box-sizing: border-box; }\
+      #chat-panel.open { position: fixed; inset: 0; width: 100%; height: 100%;\
+        max-width: none; max-height: none; border-radius: 0; border: none;\
+        box-sizing: border-box; z-index: 99999; }\
       #chat-toggle { bottom: 16px; right: 16px; width: 50px; height: 50px; }\
       #chat-input { font-size: 16px; }\
       #key-setup input { font-size: 16px; }\
@@ -542,7 +542,9 @@
     recognition.onerror = function (e) {
       isRecording = false;
       voiceButton.classList.remove('recording');
-      if (e.error !== 'no-speech') {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        voiceButton.style.display = 'none';
+      } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
         addMessage('system', 'Voice error: ' + e.error);
       }
     };
