@@ -9,7 +9,7 @@ WORKDIR /app
 RUN mkdir -p /app/.credentials && chown -R node:node /app/.credentials
 
 COPY server.js .
-COPY public/ public/
+COPY docs/ public/
 
 # Use writable path for credentials inside container
 ENV CLAUDE_CREDENTIALS_PATH=/app/.credentials/credentials.json
