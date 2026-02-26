@@ -225,11 +225,11 @@
   var COMPRESS_THRESHOLD = 20; // messages (10 exchanges)
   var KEEP_RECENT = 6; // keep last 6 messages uncompressed
 
-  // ——— Probe proxy availability ———
+  // ——— Probe proxy availability (retries on failure) ———
   function checkProxy() {
-    if (useProxy !== null) return;
     fetch('/api/health').then(function (r) {
       useProxy = r.ok;
+      if (r.ok) keySetupDiv.style.display = 'none';
     }).catch(function () {
       useProxy = false;
     });
@@ -272,9 +272,20 @@
       // Update height when browser chrome shows/hides (address bar, keyboard)
       window.addEventListener('resize', setMobileSize);
     }
+    // Only show key setup if proxy is confirmed down AND no saved key
+    // Re-check proxy first in case it recovered
     if (useProxy === false && !apiKey) {
-      keySetupDiv.style.display = 'flex';
-      keyInput.focus();
+      checkProxy();
+      // Give proxy check 500ms before deciding
+      setTimeout(function () {
+        if (useProxy === false && !apiKey) {
+          keySetupDiv.style.display = 'flex';
+          keyInput.focus();
+        } else {
+          keySetupDiv.style.display = 'none';
+          input.focus();
+        }
+      }, 500);
     } else {
       keySetupDiv.style.display = 'none';
       input.focus();
@@ -462,13 +473,6 @@
     var text = input.value.trim();
     if (!text || isStreaming) return;
 
-    // Check if we can send
-    if (useProxy === false && !apiKey) {
-      keySetupDiv.style.display = 'flex';
-      keyInput.focus();
-      return;
-    }
-
     addMessage('user', text);
     conversationHistory.push({ role: 'user', content: text });
     input.value = '';
@@ -489,22 +493,18 @@
       var response;
       var msgs = conversationHistory.slice(-30);
 
-      if (useProxy !== false) {
-        // Try proxy first
-        try {
-          response = await sendViaProxy(msgs);
-          useProxy = true;
-        } catch (proxyErr) {
-          // Proxy failed — fall back to direct API if we have a key
-          if (apiKey) {
-            response = await sendDirect(msgs);
-          } else {
-            useProxy = false;
-            throw proxyErr;
-          }
+      // Always try proxy first (it may have recovered since last check)
+      try {
+        response = await sendViaProxy(msgs);
+        useProxy = true;
+      } catch (proxyErr) {
+        // Proxy failed — fall back to direct API if we have a key
+        useProxy = false;
+        if (apiKey) {
+          response = await sendDirect(msgs);
+        } else {
+          throw new Error('Service temporarily unavailable. Please try again in a moment.');
         }
-      } else {
-        response = await sendDirect(msgs);
       }
 
       // Stream the response
@@ -551,14 +551,8 @@
       assistantDiv.textContent = 'Error: ' + fetchErr.message;
       assistantDiv.className = 'chat-msg system';
       conversationHistory.pop();
-
-      if (fetchErr.message.indexOf('401') !== -1 || fetchErr.message.indexOf('invalid') !== -1) {
-        localStorage.removeItem(LS_KEY);
-        apiKey = '';
-        if (useProxy === false) {
-          keySetupDiv.style.display = 'flex';
-        }
-      }
+      // Re-probe proxy in background (it may recover)
+      checkProxy();
     } finally {
       isStreaming = false;
       sendButton.disabled = false;
