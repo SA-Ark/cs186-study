@@ -40,28 +40,46 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for GitHub Pages CDN propagation
-        run: sleep 180
-
-      - name: Purge Cloudflare cache
+      - name: Enable Cloudflare Development Mode (bypasses all caching)
         env:
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_EMAIL: ${{ secrets.CF_EMAIL }}
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
         run: |
-          purge_cf() {
-            curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
-              -H "X-Auth-Email: ${CF_EMAIL}" \
-              -H "X-Auth-Key: ${CF_API_KEY}" \
-              -H "Content-Type: application/json" \
-              --data '{"purge_everything":true}'
-          }
+          curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/settings/development_mode" \
+            -H "X-Auth-Email: ${CF_EMAIL}" \
+            -H "X-Auth-Key: ${CF_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data '{"value":"on"}'
 
-          echo "First purge..."
-          RESULT=$(purge_cf)
+      - name: Wait for GitHub Pages CDN propagation
+        run: sleep 180
+
+      - name: Purge Cloudflare cache and disable dev mode
+        env:
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_EMAIL: ${{ secrets.CF_EMAIL }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        run: |
+          # Purge all cached content
+          echo "Purging cache..."
+          RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
+            -H "X-Auth-Email: ${CF_EMAIL}" \
+            -H "X-Auth-Key: ${CF_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}')
           echo "$RESULT"
           if ! echo "$RESULT" | grep -q '"success": true'; then
-            echo "First purge failed"
+            echo "Cache purge failed"
             exit 1
           fi
           echo "Cache purged successfully"
+
+          # Disable development mode (re-enable caching with fresh content)
+          echo "Disabling development mode..."
+          curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/settings/development_mode" \
+            -H "X-Auth-Email: ${CF_EMAIL}" \
+            -H "X-Auth-Key: ${CF_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data '{"value":"off"}'
+          echo "Development mode disabled, caching re-enabled with fresh content"
