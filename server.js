@@ -215,9 +215,11 @@ function serveStatic(req, res) {
   const ext = path.extname(filePath);
   const mime = MIME[ext] || "application/octet-stream";
   const content = fs.readFileSync(filePath);
+  // Short cache for JS (cache-busted via ?v= query), longer for static assets
+  const cacheControl = ext === ".js" ? "public, max-age=60" : "public, max-age=3600";
   res.writeHead(200, {
     "Content-Type": mime,
-    "Cache-Control": "public, max-age=3600",
+    "Cache-Control": cacheControl,
   });
   res.end(content);
 }

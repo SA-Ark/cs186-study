@@ -9,6 +9,7 @@
   var SYSTEM_PROMPT = 'You are a CS 186 (Database Systems) study assistant for UC Berkeley Spring 2026 Midterm 1.\nYou ONLY answer questions about topics covered in Midterm 1:\n- SQL (SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, Joins, Subqueries, CTEs, Views)\n- Disks, Files & Records (HDD/SSD, pages, heap files, sorted files, slotted pages, record layout)\n- IO Cost Analysis (heap vs sorted file costs, B = pages, R = records/page)\n- B+ Trees (structure, search, insert with splits, delete, bulk loading, fan-out)\n- B+ Tree Advanced (clustered vs unclustered, composite indexes, prefix rule, IO costs)\n- Spatial Indexes (KD Trees, R-Trees, MBRs, nearest neighbor search)\n- Buffer Management (buffer pool, frames, dirty bit, pin count, LRU, MRU, Clock policy)\n\nNOT on this midterm: Sorting/Hashing, Relational Algebra, Join Algorithms, Query Optimization.\n\nBe concise but thorough. Use examples when helpful. For B+ tree operations, show the tree state step by step.\nIf asked about topics not on this midterm, say so and redirect to relevant topics.';
 
   var LS_KEY = 'cs186_anthropic_key';
+  var LS_HISTORY_KEY = 'cs186_chat_history';
 
   // Proxy detection: null = unknown, true = proxy works, false = fallback to direct API
   var useProxy = null;
@@ -35,7 +36,7 @@
       box-shadow: 0 8px 40px rgba(0,0,0,0.6);\
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\
       overflow: hidden;\
-      transition: all 0.3s ease;\
+      transition: width 0.3s ease, height 0.3s ease, bottom 0.3s ease, right 0.3s ease, max-width 0.3s ease, max-height 0.3s ease;\
     }\
     #chat-panel.open { display: flex; }\
     #chat-panel.fullscreen {\
@@ -45,22 +46,26 @@
       border-radius: 12px;\
     }\
     #chat-header {\
-      display: flex; align-items: center; justify-content: space-between;\
+      display: flex; align-items: center; gap: 8px;\
       padding: 12px 16px; background: #1a1d2e; border-bottom: 1px solid #2a2d3e;\
       flex-shrink: 0;\
     }\
-    #chat-header span { color: #4A90D9; font-weight: 700; font-size: 0.95em; }\
+    #chat-header .chat-title { color: #4A90D9; font-weight: 700; font-size: 0.95em; flex-shrink: 0; }\
     #chat-header .model-tag {\
       font-size: 0.7em; background: rgba(74,144,217,0.15); color: #4A90D9;\
-      padding: 2px 8px; border-radius: 10px; font-weight: 500;\
+      padding: 2px 8px; border-radius: 10px; font-weight: 500; flex-shrink: 0;\
     }\
-    #chat-header .header-controls { display: flex; align-items: center; gap: 4px; }\
+    #chat-header .header-spacer { flex: 1; }\
+    #chat-header .header-controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }\
     #chat-header button {\
-      background: none; border: none; color: #8a8fa8; cursor: pointer; font-size: 1.2em; padding: 4px;\
+      background: none; border: none; color: #8a8fa8; cursor: pointer; padding: 4px;\
+      display: flex; align-items: center; justify-content: center;\
     }\
     #chat-header button:hover { color: #e0e0e8; }\
-    #fullscreen-btn { display: none; }\
-    @media (min-width: 501px) { #fullscreen-btn { display: inline-flex; font-size: 1em; } }\
+    #chat-header button svg { width: 16px; height: 16px; fill: currentColor; }\
+    #fullscreen-btn { display: none !important; }\
+    @media (min-width: 501px) { #fullscreen-btn { display: flex !important; } }\
+    #chat-close-btn { font-size: 1.3em; }\
     #chat-messages {\
       flex: 1; overflow-y: auto; padding: 12px 16px;\
       display: flex; flex-direction: column; gap: 10px;\
@@ -175,29 +180,42 @@
     return svg;
   }
 
+  // SVG path data
+  var ICON_CHAT = 'M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12zM7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z';
+  var ICON_MIC = 'M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zM17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z';
+  var ICON_SEND = 'M2.01 21L23 12 2.01 3 2 10l15 2-15 2z';
+  var ICON_EXPAND = 'M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z';
+  var ICON_COLLAPSE = 'M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z';
+  var ICON_TRASH = 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z';
+
   var toggleBtn = el('button', { id: 'chat-toggle', title: 'Ask Claude' });
-  toggleBtn.appendChild(svgIcon('M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12zM7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z'));
+  toggleBtn.appendChild(svgIcon(ICON_CHAT));
 
   var chatPanel = el('div', { id: 'chat-panel' });
 
+  // Header with fullscreen + clear + close buttons
+  var fsBtnEl = el('button', { id: 'fullscreen-btn', title: 'Expand chat' });
+  fsBtnEl.appendChild(svgIcon(ICON_EXPAND));
+
+  var clearBtnEl = el('button', { id: 'clear-chat-btn', title: 'Clear conversation' });
+  clearBtnEl.appendChild(svgIcon(ICON_TRASH));
+
+  var closeBtnEl = el('button', { id: 'chat-close-btn', title: 'Close', textContent: '\u00d7' });
+
   var header = el('div', { id: 'chat-header' }, [
-    el('span', { textContent: 'CS 186 Study Assistant' }),
+    el('span', { className: 'chat-title', textContent: 'CS 186 Study Assistant' }),
     el('span', { className: 'model-tag', textContent: 'Opus 4.6' }),
-    el('div', { className: 'header-controls' }, [
-      el('button', { id: 'fullscreen-btn', title: 'Toggle fullscreen' }),
-      el('button', { id: 'chat-close', title: 'Close', textContent: '\u00d7' }),
-    ]),
+    el('div', { className: 'header-spacer' }),
+    el('div', { className: 'header-controls' }, [fsBtnEl, clearBtnEl, closeBtnEl]),
   ]);
 
-  var messagesDiv = el('div', { id: 'chat-messages' }, [
-    el('div', { className: 'chat-msg system', textContent: 'Ask me anything about Midterm 1 topics! Type or use the mic button for voice.' }),
-  ]);
+  var messagesDiv = el('div', { id: 'chat-messages' });
 
-  var voiceButton = el('button', { id: 'voice-btn', className: 'chat-btn', title: 'Voice input' });
-  voiceButton.appendChild(svgIcon('M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zM17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z'));
+  var voiceButton = el('button', { id: 'voice-btn', className: 'chat-btn', title: 'Voice input (click to start, click again to stop)' });
+  voiceButton.appendChild(svgIcon(ICON_MIC));
 
   var sendButton = el('button', { id: 'send-btn', className: 'chat-btn', title: 'Send (Enter)' });
-  sendButton.appendChild(svgIcon('M2.01 21L23 12 2.01 3 2 10l15 2-15 2z'));
+  sendButton.appendChild(svgIcon(ICON_SEND));
 
   var inputArea = el('div', { id: 'chat-input-area' }, [
     voiceButton,
@@ -205,7 +223,7 @@
     sendButton,
   ]);
 
-  // Key setup overlay — hidden by default, only shown when proxy is unavailable AND no saved key
+  // Key setup overlay
   var keySetupDiv = el('div', { id: 'key-setup' }, [
     el('h3', { textContent: 'Set Up API Key' }),
     el('p', { textContent: 'Enter your Anthropic API key to chat with Claude Opus 4.6.\nKey is stored only in your browser\'s localStorage.' }),
@@ -222,36 +240,78 @@
   document.body.appendChild(toggleBtn);
   document.body.appendChild(chatPanel);
 
-  // ——— Fullscreen toggle ———
-  var fsBtn = document.getElementById('fullscreen-btn');
-  var isFullscreen = false;
-  // Expand icon (arrows pointing outward)
-  var expandIcon = svgIcon('M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
-  // Collapse icon (arrows pointing inward)
-  var collapseIcon = svgIcon('M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z');
-  fsBtn.appendChild(expandIcon);
-
-  fsBtn.addEventListener('click', function () {
-    isFullscreen = !isFullscreen;
-    chatPanel.classList.toggle('fullscreen', isFullscreen);
-    while (fsBtn.firstChild) fsBtn.removeChild(fsBtn.firstChild);
-    fsBtn.appendChild(isFullscreen ? collapseIcon : expandIcon);
-    fsBtn.title = isFullscreen ? 'Exit fullscreen' : 'Toggle fullscreen';
-  });
-
   // ——— References ———
   var input = document.getElementById('chat-input');
   var keyInput = document.getElementById('key-input');
 
   var apiKey = localStorage.getItem(LS_KEY) || '';
   var conversationHistory = [];
+  var displayMessages = []; // {role, text} for UI persistence
   var isStreaming = false;
   var recognition = null;
   var isRecording = false;
+  var isFullscreen = false;
 
-  // Conversation compression: when history exceeds this many messages, compress older ones
-  var COMPRESS_THRESHOLD = 20; // messages (10 exchanges)
-  var KEEP_RECENT = 6; // keep last 6 messages uncompressed
+  var COMPRESS_THRESHOLD = 20;
+  var KEEP_RECENT = 6;
+
+  // ——— Conversation persistence (localStorage) ———
+  function saveHistory() {
+    try {
+      localStorage.setItem(LS_HISTORY_KEY, JSON.stringify({
+        conversation: conversationHistory,
+        display: displayMessages
+      }));
+    } catch (e) { /* storage full */ }
+  }
+
+  function loadHistory() {
+    try {
+      var stored = localStorage.getItem(LS_HISTORY_KEY);
+      if (!stored) return;
+      var data = JSON.parse(stored);
+      if (data.conversation && Array.isArray(data.conversation)) {
+        conversationHistory = data.conversation;
+      }
+      if (data.display && Array.isArray(data.display)) {
+        displayMessages = data.display;
+        for (var i = 0; i < displayMessages.length; i++) {
+          var msg = displayMessages[i];
+          if (msg.role === 'assistant') {
+            var div = el('div', { className: 'chat-msg assistant' });
+            renderAssistantText(div, msg.text);
+            messagesDiv.appendChild(div);
+          } else {
+            addMessageRaw(msg.role, msg.text);
+          }
+        }
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+    } catch (e) { /* corrupt — start fresh */ }
+  }
+
+  function clearConversation() {
+    conversationHistory = [];
+    displayMessages = [];
+    localStorage.removeItem(LS_HISTORY_KEY);
+    while (messagesDiv.firstChild) messagesDiv.removeChild(messagesDiv.firstChild);
+    addMessageRaw('system', 'Conversation cleared. Ask me anything about Midterm 1!');
+  }
+
+  // ——— Fullscreen toggle ———
+  fsBtnEl.addEventListener('click', function () {
+    isFullscreen = !isFullscreen;
+    chatPanel.classList.toggle('fullscreen', isFullscreen);
+    while (fsBtnEl.firstChild) fsBtnEl.removeChild(fsBtnEl.firstChild);
+    fsBtnEl.appendChild(svgIcon(isFullscreen ? ICON_COLLAPSE : ICON_EXPAND));
+    fsBtnEl.title = isFullscreen ? 'Shrink chat' : 'Expand chat';
+  });
+
+  // ——— Clear chat ———
+  clearBtnEl.addEventListener('click', function () {
+    if (isStreaming) return;
+    clearConversation();
+  });
 
   // ——— Probe proxy availability ———
   function checkProxy() {
@@ -268,7 +328,6 @@
   toggleBtn.addEventListener('click', function () {
     chatPanel.classList.toggle('open');
     if (chatPanel.classList.contains('open')) {
-      // Only show key setup if proxy is definitely unavailable AND no key stored
       if (useProxy === false && !apiKey) {
         keySetupDiv.style.display = 'flex';
         keyInput.focus();
@@ -278,11 +337,11 @@
       }
     }
   });
-  document.getElementById('chat-close').addEventListener('click', function () {
+  closeBtnEl.addEventListener('click', function () {
     chatPanel.classList.remove('open');
   });
 
-  // ——— Key setup (fallback for static hosting) ———
+  // ——— Key setup ———
   document.getElementById('key-save').addEventListener('click', function () {
     var k = keyInput.value.trim();
     if (!k.startsWith('sk-ant-')) {
@@ -313,10 +372,19 @@
   });
   sendButton.addEventListener('click', sendMessage);
 
-  function addMessage(role, text) {
+  function addMessageRaw(role, text) {
     var div = el('div', { className: 'chat-msg ' + role, textContent: text });
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    return div;
+  }
+
+  function addMessage(role, text) {
+    var div = addMessageRaw(role, text);
+    if (role !== 'system') {
+      displayMessages.push({ role: role, text: text });
+      saveHistory();
+    }
     return div;
   }
 
@@ -359,7 +427,6 @@
     });
   }
 
-  // Send via proxy (/api/chat) — no API key needed
   function sendViaProxy(messages) {
     return fetch('/api/chat', {
       method: 'POST',
@@ -381,7 +448,6 @@
     });
   }
 
-  // Send via direct Anthropic API (fallback when proxy unavailable)
   function sendDirect(messages) {
     return fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -408,41 +474,36 @@
     });
   }
 
-  // Compress older conversation history into a summary
   function compressHistory() {
     if (conversationHistory.length <= COMPRESS_THRESHOLD) return;
 
     var toCompress = conversationHistory.slice(0, conversationHistory.length - KEEP_RECENT);
     var kept = conversationHistory.slice(conversationHistory.length - KEEP_RECENT);
 
-    // Build a summary of the compressed messages
     var summaryParts = [];
     for (var i = 0; i < toCompress.length; i++) {
       var msg = toCompress[i];
       var prefix = msg.role === 'user' ? 'Student' : 'Tutor';
       var content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
-      // Truncate long messages in summary
       if (content.length > 200) content = content.substring(0, 200) + '...';
       summaryParts.push(prefix + ': ' + content);
     }
 
-    var summaryText = '[Earlier conversation summary — ' + toCompress.length + ' messages compressed]\n' + summaryParts.join('\n');
+    var summaryText = '[Earlier conversation summary - ' + toCompress.length + ' messages compressed]\n' + summaryParts.join('\n');
 
-    // Replace history with: compressed summary as first user message, then recent messages
     conversationHistory = [
       { role: 'user', content: summaryText },
       { role: 'assistant', content: 'Understood, I have the context from our earlier conversation. Let\'s continue.' }
     ].concat(kept);
 
-    // Show compression notice in UI
-    addMessage('system', 'Context compressed to save space. Recent conversation preserved.');
+    addMessageRaw('system', 'Context compressed to save space. Recent conversation preserved.');
+    saveHistory();
   }
 
   async function sendMessage() {
     var text = input.value.trim();
     if (!text || isStreaming) return;
 
-    // Check if we can send
     if (useProxy === false && !apiKey) {
       keySetupDiv.style.display = 'flex';
       keyInput.focus();
@@ -456,7 +517,6 @@
     sendButton.disabled = true;
     isStreaming = true;
 
-    // Compress history if too long
     compressHistory();
 
     var assistantDiv = el('div', { className: 'chat-msg assistant' });
@@ -470,12 +530,10 @@
       var msgs = conversationHistory.slice(-30);
 
       if (useProxy !== false) {
-        // Try proxy first
         try {
           response = await sendViaProxy(msgs);
           useProxy = true;
         } catch (proxyErr) {
-          // Proxy failed — fall back to direct API if we have a key
           if (apiKey) {
             response = await sendDirect(msgs);
           } else {
@@ -487,7 +545,6 @@
         response = await sendDirect(msgs);
       }
 
-      // Stream the response
       var reader = response.body.getReader();
       var decoder = new TextDecoder();
       var fullText = '';
@@ -514,7 +571,7 @@
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
               }
             } catch (parseErr) {
-              // Skip unparseable chunks
+              // skip
             }
           }
         }
@@ -526,6 +583,8 @@
       }
 
       conversationHistory.push({ role: 'assistant', content: fullText });
+      displayMessages.push({ role: 'assistant', text: fullText });
+      saveHistory();
 
     } catch (fetchErr) {
       assistantDiv.textContent = 'Error: ' + fetchErr.message;
@@ -547,10 +606,9 @@
   }
 
   // ——— Voice Input (Web Speech API) ———
-  // Voice transcribes to text field ONLY. User reviews/edits, then sends manually.
   // Continuous mode: records until user clicks stop. Multiple sessions append.
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var voiceBaseText = ''; // text in input before current recording session
+  var voiceBaseText = '';
 
   if (SpeechRecognition) {
     recognition = new SpeechRecognition();
@@ -559,10 +617,16 @@
     recognition.lang = 'en-US';
 
     recognition.onresult = function (e) {
-      var transcript = '';
+      var finalText = '';
+      var interimText = '';
       for (var i = 0; i < e.results.length; i++) {
-        transcript += e.results[i][0].transcript;
+        if (e.results[i].isFinal) {
+          finalText += e.results[i][0].transcript;
+        } else {
+          interimText += e.results[i][0].transcript;
+        }
       }
+      var transcript = finalText + interimText;
       var sep = voiceBaseText && transcript ? ' ' : '';
       input.value = voiceBaseText + sep + transcript;
       input.dispatchEvent(new Event('input'));
@@ -570,9 +634,11 @@
 
     recognition.onend = function () {
       if (isRecording) {
-        // Browser auto-stopped (timeout/silence) — restart to keep recording
+        // Browser auto-stopped — save progress and restart seamlessly
         voiceBaseText = input.value;
-        try { recognition.start(); } catch (err) {
+        try {
+          recognition.start();
+        } catch (err) {
           isRecording = false;
           voiceButton.classList.remove('recording');
           input.focus();
@@ -584,22 +650,30 @@
     };
 
     recognition.onerror = function (e) {
-      if (e.error === 'no-speech') return; // ignore, keep recording
-      if (e.error === 'aborted') return; // ignore on intentional stop
+      if (e.error === 'no-speech') return;
+      if (e.error === 'aborted') return;
       isRecording = false;
       voiceButton.classList.remove('recording');
-      addMessage('system', 'Voice error: ' + e.error);
+      addMessageRaw('system', 'Voice error: ' + e.error);
     };
 
     voiceButton.addEventListener('click', function () {
       if (isRecording) {
+        // Stop recording — keep all accumulated text
         isRecording = false;
         recognition.stop();
       } else {
+        // Start recording — preserve whatever is already in the input
         isRecording = true;
         voiceButton.classList.add('recording');
-        voiceBaseText = input.value; // preserve existing text
-        recognition.start();
+        voiceBaseText = input.value;
+        try {
+          recognition.start();
+        } catch (err) {
+          isRecording = false;
+          voiceButton.classList.remove('recording');
+          addMessageRaw('system', 'Could not start voice: ' + err.message);
+        }
       }
     });
   } else {
@@ -607,7 +681,13 @@
     voiceButton.style.cursor = 'not-allowed';
     voiceButton.title = 'Voice not supported in this browser';
     voiceButton.addEventListener('click', function () {
-      addMessage('system', 'Voice input is not supported in this browser. Try Chrome on desktop or Android.');
+      addMessageRaw('system', 'Voice input is not supported in this browser. Try Chrome on desktop or Android.');
     });
+  }
+
+  // ——— Init: load saved conversation ———
+  loadHistory();
+  if (displayMessages.length === 0) {
+    addMessageRaw('system', 'Ask me anything about Midterm 1 topics! Type or use the mic button for voice.');
   }
 })();
