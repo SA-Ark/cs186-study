@@ -237,23 +237,50 @@
   }
   checkProxy();
 
-  // ——— Toggle panel ———
-  toggleBtn.addEventListener('click', function () {
-    chatPanel.classList.toggle('open');
-    if (chatPanel.classList.contains('open')) {
-      // Only show key setup if proxy is definitely unavailable AND no key stored
-      if (useProxy === false && !apiKey) {
-        keySetupDiv.style.display = 'flex';
-        keyInput.focus();
-      } else {
-        keySetupDiv.style.display = 'none';
-        input.focus();
+  // ——— Mobile helpers ———
+  var isMobile = window.matchMedia('(max-width: 500px)').matches;
+  var savedViewport = '';
+
+  function openChat() {
+    chatPanel.classList.add('open');
+    if (isMobile) {
+      document.body.style.overflow = 'hidden';
+      // Prevent iOS zoom: temporarily set viewport to disable scaling
+      var vp = document.querySelector('meta[name="viewport"]');
+      if (vp) {
+        savedViewport = vp.getAttribute('content');
+        vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
       }
     }
-  });
-  document.getElementById('chat-close').addEventListener('click', function () {
+    if (useProxy === false && !apiKey) {
+      keySetupDiv.style.display = 'flex';
+      keyInput.focus();
+    } else {
+      keySetupDiv.style.display = 'none';
+      input.focus();
+    }
+  }
+
+  function closeChat() {
     chatPanel.classList.remove('open');
+    if (isMobile) {
+      document.body.style.overflow = '';
+      var vp = document.querySelector('meta[name="viewport"]');
+      if (vp && savedViewport) {
+        vp.setAttribute('content', savedViewport);
+      }
+    }
+  }
+
+  // ——— Toggle panel ———
+  toggleBtn.addEventListener('click', function () {
+    if (chatPanel.classList.contains('open')) {
+      closeChat();
+    } else {
+      openChat();
+    }
   });
+  document.getElementById('chat-close').addEventListener('click', closeChat);
 
   // ——— Key setup (fallback for static hosting) ———
   document.getElementById('key-save').addEventListener('click', function () {
