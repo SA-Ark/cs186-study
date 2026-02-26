@@ -129,12 +129,10 @@
     #key-setup .key-save-btn:hover { background: #5ba0e9; }\
     #key-setup .key-note { font-size: 0.72em; color: #555; margin-top: 4px; }\
     @media (max-width: 500px) {\
-      #chat-panel.open { position: fixed; inset: 0; width: 100%; height: 100%;\
-        max-width: none; max-height: none; border-radius: 0; border: none;\
-        box-sizing: border-box; z-index: 99999; }\
       #chat-toggle { bottom: 16px; right: 16px; width: 50px; height: 50px; }\
-      #chat-input { font-size: 16px; }\
-      #key-setup input { font-size: 16px; }\
+      #chat-input { font-size: 16px !important; }\
+      #key-setup input { font-size: 16px !important; }\
+      .chat-msg { font-size: 14px; }\
     }\
   ';
   document.head.appendChild(css);
@@ -239,18 +237,33 @@
 
   // ——— Mobile helpers ———
   var isMobile = window.matchMedia('(max-width: 500px)').matches;
-  var savedViewport = '';
+  var savedScrollY = 0;
 
   function openChat() {
     chatPanel.classList.add('open');
     if (isMobile) {
+      // Lock body scroll (position:fixed trick — most reliable cross-browser)
+      savedScrollY = window.pageYOffset || document.documentElement.scrollTop;
       document.body.style.overflow = 'hidden';
-      // Prevent iOS zoom: temporarily set viewport to disable scaling
-      var vp = document.querySelector('meta[name="viewport"]');
-      if (vp) {
-        savedViewport = vp.getAttribute('content');
-        vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-      }
+      document.body.style.position = 'fixed';
+      document.body.style.top = '-' + savedScrollY + 'px';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      // Force chat panel full-screen via inline styles (max specificity, no CSS compat issues)
+      chatPanel.style.position = 'fixed';
+      chatPanel.style.top = '0';
+      chatPanel.style.left = '0';
+      chatPanel.style.right = '0';
+      chatPanel.style.bottom = '0';
+      chatPanel.style.width = '100%';
+      chatPanel.style.height = '100%';
+      chatPanel.style.maxWidth = 'none';
+      chatPanel.style.maxHeight = 'none';
+      chatPanel.style.borderRadius = '0';
+      chatPanel.style.border = 'none';
+      chatPanel.style.zIndex = '99999';
+      chatPanel.style.boxSizing = 'border-box';
     }
     if (useProxy === false && !apiKey) {
       keySetupDiv.style.display = 'flex';
@@ -264,11 +277,16 @@
   function closeChat() {
     chatPanel.classList.remove('open');
     if (isMobile) {
+      // Clear all inline styles on panel
+      chatPanel.style.cssText = '';
+      // Unlock body and restore scroll position
       document.body.style.overflow = '';
-      var vp = document.querySelector('meta[name="viewport"]');
-      if (vp && savedViewport) {
-        vp.setAttribute('content', savedViewport);
-      }
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      window.scrollTo(0, savedScrollY);
     }
   }
 
