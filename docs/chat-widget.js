@@ -50,7 +50,28 @@
       width: 100vw; height: 100vh;\
       max-width: 100vw; max-height: 100vh;\
       border-radius: 0;\
+      font-size: 18px;\
     }\
+    #chat-panel.fullscreen #chat-header { padding: 16px 24px; gap: 12px; }\
+    #chat-panel.fullscreen #chat-header .chat-title { font-size: 1.5em; }\
+    #chat-panel.fullscreen #chat-header .model-tag { font-size: 1em; padding: 4px 12px; }\
+    #chat-panel.fullscreen #chat-header button svg { width: 28px; height: 28px; }\
+    #chat-panel.fullscreen #chat-messages { padding: 24px 32px; gap: 16px; }\
+    #chat-panel.fullscreen .chat-msg { max-width: 100%; padding: 18px 24px; font-size: 1.15em; line-height: 1.7; border-radius: 14px; }\
+    #chat-panel.fullscreen .chat-msg.user { border-bottom-right-radius: 4px; }\
+    #chat-panel.fullscreen .chat-msg.assistant { border-bottom-left-radius: 4px; }\
+    #chat-panel.fullscreen .chat-msg.system { font-size: 1em; }\
+    #chat-panel.fullscreen #chat-input-area { padding: 16px 24px; gap: 12px; }\
+    #chat-panel.fullscreen #chat-input { padding: 16px 20px; font-size: 1.15em; min-height: 52px; max-height: 160px; }\
+    #chat-panel.fullscreen .chat-btn { width: 52px; height: 52px; }\
+    #chat-panel.fullscreen .chat-btn svg { width: 26px; height: 26px; }\
+    #chat-panel.fullscreen #chat-sidebar.open { width: 300px; }\
+    #chat-panel.fullscreen #sidebar-header { padding: 12px 16px; }\
+    #chat-panel.fullscreen #sidebar-header span { font-size: 1.1em; }\
+    #chat-panel.fullscreen #new-chat-btn { width: 36px; height: 36px; font-size: 1.5em; }\
+    #chat-panel.fullscreen .chat-list-item { padding: 12px 16px; }\
+    #chat-panel.fullscreen .chat-list-item .chat-item-title { font-size: 1.05em; }\
+    #chat-panel.fullscreen .chat-list-item .chat-item-delete { font-size: 1.1em; }\
     #chat-header {\
       display: flex; align-items: center; gap: 8px;\
       padding: 10px 12px; background: #1a1d2e; border-bottom: 1px solid #2a2d3e;\
