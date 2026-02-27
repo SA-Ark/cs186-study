@@ -68,9 +68,9 @@ function getCredPath() {
 }
 
 /**
- * Bootstrap credentials file from environment variables if it doesn't exist.
- * This supports deployment to environments (like Coolify/Docker) where
- * OAUTH_REFRESH_TOKEN is set as an env var instead of a file.
+ * Credential management with PostgreSQL persistence.
+ * Priority: DB (survives rebuilds) > file > env var (initial seed only).
+ * Every token refresh saves to both DB and file.
  */
 function bootstrapCredentials() {
   const credPath = getCredPath();
@@ -79,12 +79,8 @@ function bootstrapCredentials() {
   const refreshToken = process.env.OAUTH_REFRESH_TOKEN;
   if (!refreshToken) return;
 
-  // Ensure directory exists
   const dir = path.dirname(credPath);
-  if (!dir.startsWith("/app")) {
-    // For non-app paths, ensure the directory exists
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  fs.mkdirSync(dir, { recursive: true });
 
   const data = {
     claudeAiOauth: {
@@ -97,16 +93,55 @@ function bootstrapCredentials() {
   console.log("Bootstrapped credentials from OAUTH_REFRESH_TOKEN env var");
 }
 
+async function loadCredsFromDB() {
+  if (!db) return null;
+  try {
+    const res = await db.query("SELECT value FROM settings WHERE key = 'oauth_creds' LIMIT 1");
+    if (res.rows.length) return JSON.parse(res.rows[0].value);
+  } catch { /* table may not exist yet */ }
+  return null;
+}
+
+async function saveCredsToDB(creds) {
+  if (!db) return;
+  try {
+    await db.query(
+      `INSERT INTO settings (key, value) VALUES ('oauth_creds', $1)
+       ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()`,
+      [JSON.stringify(creds)]
+    );
+  } catch { /* non-fatal */ }
+}
+
 function loadCredentials() {
   const data = JSON.parse(fs.readFileSync(getCredPath(), "utf-8"));
   return data.claudeAiOauth;
 }
 
 function saveCredentials(creds) {
+  // Save to file
   const credPath = getCredPath();
   const data = JSON.parse(fs.readFileSync(credPath, "utf-8"));
   data.claudeAiOauth = creds;
   fs.writeFileSync(credPath, JSON.stringify(data, null, 2));
+  // Also persist to DB (fire-and-forget)
+  saveCredsToDB(creds).catch(() => {});
+}
+
+async function restoreCredsFromDB() {
+  const dbCreds = await loadCredsFromDB();
+  if (!dbCreds || !dbCreds.refreshToken) return false;
+
+  // Check if DB creds are newer/valid
+  const credPath = getCredPath();
+  const fileCreds = loadCredentials();
+  if (dbCreds.expiresAt > (fileCreds.expiresAt || 0)) {
+    const data = { claudeAiOauth: dbCreds };
+    fs.writeFileSync(credPath, JSON.stringify(data, null, 2));
+    console.log("Restored credentials from database (survives rebuilds)");
+    return true;
+  }
+  return false;
 }
 
 function httpsPost(url, headers, body) {
@@ -212,6 +247,13 @@ async function initDB() {
     )
   `);
   await db.query(`CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id)`);
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
   console.log("Database connected and tables ready");
 }
 
@@ -523,8 +565,9 @@ const server = http.createServer(async (req, res) => {
 // Bootstrap credentials from env vars if needed (for Docker/Coolify deployment)
 bootstrapCredentials();
 
-// Initialize database then start server
+// Initialize database, restore credentials, then start server
 initDB()
+  .then(() => restoreCredsFromDB())
   .then(() => {
     server.listen(PORT, () => {
       console.log(`CS186 Study Assistant running on :${PORT}`);
