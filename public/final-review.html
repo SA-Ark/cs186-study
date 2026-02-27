@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 186 Midterm 1 — Final Review Test</title>
+<style>
+:root {
+  --bg: #0f1117; --card: #1a1d2e; --text: #e0e0e8; --muted: #8a8fa8;
+  --accent: #4A90D9; --green: #34d399; --red: #f87171; --orange: #fb923c;
+  --purple: #a78bfa; --yellow: #fbbf24; --border: #2a2d3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  line-height: 1.65; padding: 2rem 1rem;
+  max-width: 960px; margin: 0 auto;
+}
+h1 { font-size: 2rem; text-align: center; color: var(--accent); margin-bottom: 0.25rem; }
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+h2 { font-size: 1.45rem; color: var(--accent); margin: 2.5rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border); }
+h3 { font-size: 1.15rem; color: var(--text); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 1rem; color: var(--orange); margin: 1rem 0 0.4rem; }
+p, li { margin-bottom: 0.4rem; }
+ul, ol { padding-left: 1.5rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: #161824; padding: 1px 5px; border-radius: 4px; font-size: 0.88em;
+  color: var(--green);
+}
+pre {
+  background: #161824; padding: 1rem; border-radius: 8px; overflow-x: auto;
+  font-size: 0.85rem; line-height: 1.5; margin: 0.5rem 0 1rem;
+  border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+/* Nav bar */
+.nav-bar { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+.nav-bar a { padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; transition: 0.2s; }
+.nav-active { background: var(--accent); color: #fff !important; }
+.nav-link { background: var(--card); color: var(--text) !important; border: 1px solid var(--accent); }
+.nav-link:hover { background: var(--accent); color: #fff !important; text-decoration: none; }
+
+/* Question blocks */
+.question-block { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1rem 0; }
+.question-block .q-num { color: var(--orange); font-weight: 700; margin-bottom: 0.5rem; }
+.question-block .q-text { margin-bottom: 0.75rem; }
+.solution { display: none; background: #111322; border: 1px solid var(--green); border-radius: 8px; padding: 1rem 1.25rem; margin-top: 0.75rem; }
+.solution.visible { display: block; }
+.solution-label { color: var(--green); font-weight: 700; margin-bottom: 0.5rem; }
+.toggle-btn { background: var(--accent); color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
+.toggle-btn:hover { background: #5ba0e9; }
+.score-card { background: var(--card); border: 1px solid var(--accent); border-radius: 10px; padding: 1.5rem; text-align: center; margin: 2rem 0; }
+
+/* Show All / Hide All */
+.controls { text-align: center; margin-bottom: 1.5rem; }
+.controls button {
+  background: var(--purple); color: #fff; border: none; padding: 0.5rem 1.25rem;
+  border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+  transition: 0.2s; margin: 0 0.35rem;
+}
+.controls button:hover { opacity: 0.85; }
+
+/* Section progress */
+.section-info { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<h1>Final Review Test</h1>
+<p class="subtitle">CS 186 Midterm 1 — UC Berkeley Spring 2026 — 25 Questions</p>
+
+<div class="nav-bar">
+  <a href="index.html" class="nav-link">Flashcards</a>
+  <a href="study-guide.html" class="nav-link">Study Guide</a>
+  <a href="cheatsheet.html" class="nav-link">Cheat Sheet</a>
+  <a href="extended-cheatsheet.html" class="nav-link">Extended Reference</a>
+  <a href="practice-tests.html" class="nav-link">Practice Tests</a>
+  <a href="final-review.html" class="nav-active">Final Review</a>
+  <a href="exam-cheatsheet.html" class="nav-link">Exam Cheat Sheet</a>
+</div>
+
+<div class="score-card">
+  <p style="font-size: 1.1rem; font-weight: 600; color: var(--accent);">Exam Simulation</p>
+  <p style="color: var(--muted); margin-top: 0.35rem;">Work through each question before revealing solutions. 5 sections, 25 questions total.</p>
+</div>
+
+<div class="controls">
+  <button id="show-all-btn" onclick="toggleAll(true)">Show All Solutions</button>
+  <button id="hide-all-btn" onclick="toggleAll(false)">Hide All Solutions</button>
+</div>
+
+<!-- ===================== SECTION 1: SQL ===================== -->
+<h2>Section 1: SQL (8 Questions)</h2>
+<p class="section-info">Core SQL semantics, aggregation, joins, subqueries, and set operations.</p>
+
+<!-- Q1 -->
+<div class="question-block">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">
+    <p>Write the <strong>conceptual evaluation order</strong> of the following SQL statement:</p>
+    <pre><code>SELECT dept, COUNT(*)
+FROM Students
+WHERE gpa > 3.0
+GROUP BY dept
+HAVING COUNT(*) > 5
+ORDER BY dept
+LIMIT 3;</code></pre>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>The conceptual (logical) evaluation order is:</p>
+    <ol>
+      <li><code>FROM</code> — identify the table(s)</li>
+      <li><code>WHERE</code> — filter individual rows</li>
+      <li><code>GROUP BY</code> — form groups</li>
+      <li><code>HAVING</code> — filter groups</li>
+      <li><code>SELECT</code> — compute output expressions</li>
+      <li><code>ORDER BY</code> — sort the result</li>
+      <li><code>LIMIT</code> — truncate to N rows</li>
+    </ol>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> This is <em>logical</em> order, not the order the clauses appear in the SQL text. The optimizer may execute differently, but semantically this is what happens.</p>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="question-block">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">
+    <p>Given a table <code>Boba(shop_name TEXT, drink TEXT, price FLOAT, rating INT)</code>, write a query to find shop names where the average rating across all their drinks is above 4.0, ordered by average rating descending.</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <pre><code>SELECT shop_name, AVG(rating) AS avg_rating
+FROM Boba
+GROUP BY shop_name
+HAVING AVG(rating) > 4.0
+ORDER BY avg_rating DESC;</code></pre>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> The <code>HAVING</code> clause filters <em>after</em> grouping (operates on groups), while <code>WHERE</code> filters <em>before</em> grouping (operates on individual rows). You cannot use column aliases in HAVING in standard SQL.</p>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="question-block">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">
+    <p>What is wrong with this query?</p>
+    <pre><code>SELECT name, dept, MAX(gpa)
+FROM Students
+WHERE COUNT(*) > 5
+GROUP BY dept;</code></pre>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>Two errors:</p>
+    <ol>
+      <li><strong><code>name</code> is not in GROUP BY</strong> but appears in SELECT without an aggregate function. Every non-aggregated column in SELECT must appear in GROUP BY.</li>
+      <li><strong><code>COUNT(*)</code> cannot appear in WHERE.</strong> Aggregate functions go in <code>HAVING</code>, not <code>WHERE</code>. WHERE operates on individual rows <em>before</em> groups are formed, so aggregates are undefined there.</li>
+    </ol>
+    <p style="margin-top: 0.5rem;">Corrected version:</p>
+    <pre><code>SELECT dept, MAX(gpa)
+FROM Students
+GROUP BY dept
+HAVING COUNT(*) > 5;</code></pre>
+  </div>
+</div>
+
+<!-- Q4 -->
+<div class="question-block">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">
+    <p>Given <code>Students(sid, name, gpa)</code> and <code>Enrollments(sid, cid, grade)</code>, write SQL using <code>NOT EXISTS</code> to find students who have <strong>never enrolled</strong> in any course.</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <pre><code>SELECT s.name
+FROM Students s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Enrollments e
+    WHERE e.sid = s.sid
+);</code></pre>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> <code>NOT EXISTS</code> is a <em>correlated subquery</em> — the inner query references <code>s.sid</code> from the outer query. For each student, it checks whether any enrollment row exists. <code>SELECT 1</code> is conventional (the actual value selected doesn't matter, only whether any row is returned).</p>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="question-block">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">
+    <p>What does the following query return?</p>
+    <pre><code>SELECT *
+FROM A LEFT OUTER JOIN B ON A.id = B.aid
+WHERE B.aid IS NULL;</code></pre>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>All rows from <code>A</code> that have <strong>no matching row in B</strong>.</p>
+    <p>How it works:</p>
+    <ol>
+      <li>The <code>LEFT OUTER JOIN</code> preserves all rows from A. For rows in A with no match in B, the B columns are filled with <code>NULL</code>.</li>
+      <li>The <code>WHERE B.aid IS NULL</code> filter then keeps <em>only</em> those unmatched A rows.</li>
+    </ol>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Pattern:</strong> This is the standard "anti-join" pattern — find rows in one table with no corresponding row in another. Equivalent to <code>NOT EXISTS</code> or <code>NOT IN</code> (but safer than NOT IN with NULLs).</p>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="question-block">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">
+    <p>Why is <code>NOT IN</code> dangerous when the subquery might return <code>NULL</code> values? What should you use instead?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>If the subquery returns <strong>any NULL value</strong>, the entire <code>NOT IN</code> condition evaluates to <code>UNKNOWN</code> (not FALSE) for every row. This means <strong>no rows pass the filter</strong> and the query returns empty results.</p>
+    <p style="margin-top: 0.5rem;">Why? SQL uses three-valued logic. <code>x NOT IN (1, 2, NULL)</code> becomes <code>x != 1 AND x != 2 AND x != NULL</code>. The last comparison is always UNKNOWN, and <code>anything AND UNKNOWN</code> is at best UNKNOWN, never TRUE.</p>
+    <p style="margin-top: 0.5rem;"><strong>Use <code>NOT EXISTS</code> instead</strong> — it handles NULLs correctly because it only checks whether any row is returned, not the actual values.</p>
+  </div>
+</div>
+
+<!-- Q7 -->
+<div class="question-block">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">
+    <p>What is the difference between <code>UNION</code> and <code>UNION ALL</code>? When would you prefer each?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <ul>
+      <li><code>UNION</code> — removes duplicates (set semantics). Requires a deduplication step (sort or hash).</li>
+      <li><code>UNION ALL</code> — keeps all rows including duplicates (bag semantics). No deduplication overhead.</li>
+    </ul>
+    <p style="margin-top: 0.5rem;">Prefer <code>UNION ALL</code> when:</p>
+    <ul>
+      <li>You know there are no duplicates between the two result sets, or</li>
+      <li>Duplicates are acceptable in your use case.</li>
+    </ul>
+    <p>It is faster because it skips the expensive deduplication step.</p>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="question-block">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">
+    <p>Write a query using a <strong>CTE (Common Table Expression)</strong> that finds the department with the highest average GPA, then returns all students in that department.</p>
+    <p>Schema: <code>Students(sid, name, dept, gpa)</code></p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <pre><code>WITH TopDept AS (
+    SELECT dept
+    FROM Students
+    GROUP BY dept
+    ORDER BY AVG(gpa) DESC
+    LIMIT 1
+)
+SELECT s.*
+FROM Students s, TopDept t
+WHERE s.dept = t.dept;</code></pre>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> A CTE (<code>WITH ... AS</code>) defines a temporary named result set. It makes complex queries more readable by breaking them into logical steps. The CTE is evaluated first, then referenced in the main query like a table.</p>
+  </div>
+</div>
+
+<!-- ===================== SECTION 2: Disks, Files & Records ===================== -->
+<h2>Section 2: Disks, Files & Records (4 Questions)</h2>
+<p class="section-info">Record layout, page capacity, heap files, and I/O cost analysis.</p>
+
+<!-- Q9 -->
+<div class="question-block">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">
+    <p>Given the following table definition, compute the <strong>minimum and maximum record sizes</strong>.</p>
+    <pre><code>CREATE TABLE Products(
+    id          INTEGER PRIMARY KEY,
+    name        VARCHAR(10) NOT NULL,
+    price       INTEGER NOT NULL,
+    description CHAR(20)
+);</code></pre>
+    <p>Assume: Header = 8 bytes, INTEGER = 4 bytes.</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p><strong>Minimum record size:</strong></p>
+    <ul>
+      <li>Header: 8 bytes</li>
+      <li><code>id</code> (INTEGER): 4 bytes</li>
+      <li><code>name</code> (VARCHAR(10)): 0 bytes (minimum for variable-length)</li>
+      <li><code>price</code> (INTEGER): 4 bytes</li>
+      <li><code>description</code> (CHAR(20)): 20 bytes (always fixed)</li>
+    </ul>
+    <p><strong>Min = 8 + 4 + 0 + 4 + 20 = 36 bytes</strong></p>
+    <p style="margin-top: 0.5rem;"><strong>Maximum record size:</strong></p>
+    <ul>
+      <li>Header: 8 bytes</li>
+      <li><code>id</code> (INTEGER): 4 bytes</li>
+      <li><code>name</code> (VARCHAR(10)): 10 bytes (maximum for variable-length)</li>
+      <li><code>price</code> (INTEGER): 4 bytes</li>
+      <li><code>description</code> (CHAR(20)): 20 bytes (always fixed)</li>
+    </ul>
+    <p><strong>Max = 8 + 4 + 10 + 4 + 20 = 46 bytes</strong></p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key rule:</strong> <code>CHAR(n)</code> is ALWAYS n bytes (fixed-length, padded). <code>VARCHAR(n)</code> is 0 to n bytes (variable-length, stores only actual content).</p>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="question-block">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">
+    <p>Pages are <strong>1 KB (1024 bytes)</strong>. Fixed-length records are <strong>64 bytes</strong> each. The page uses a <strong>packed layout with a bitmap</strong> (1 bit per slot, rounded up to the nearest byte).</p>
+    <p>How many records fit per page?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>Let <em>n</em> = number of records. We need:</p>
+    <pre><code>64n + ceil(n/8) &le; 1024</code></pre>
+    <ul>
+      <li>Try n = 15: 64(15) + ceil(15/8) = 960 + 2 = 962 &le; 1024 -- fits</li>
+      <li>Try n = 16: 64(16) + ceil(16/8) = 1024 + 2 = 1026 > 1024 -- does not fit</li>
+    </ul>
+    <p><strong>Answer: 15 records per page.</strong></p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Formula:</strong> For packed layout with bitmap, each record costs its size + 1/8 byte for the bitmap. Don't forget to round the bitmap size up to the nearest whole byte.</p>
+  </div>
+</div>
+
+<!-- Q11 -->
+<div class="question-block">
+  <div class="q-num">Question 11</div>
+  <div class="q-text">
+    <p>You have <strong>10,000 records</strong> and a heap file with <strong>50 records per page</strong> capacity. All data pages are <strong>half full</strong>.</p>
+    <p>How many data pages are in the heap file?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>Half full means each page holds: 50 / 2 = <strong>25 records</strong>.</p>
+    <p>Total pages: 10,000 / 25 = <strong>400 data pages</strong>.</p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> Fill factor directly impacts space usage and scan costs. A half-full file uses 2x the pages of a fully packed file. This is common after many insertions and deletions in a heap file.</p>
+  </div>
+</div>
+
+<!-- Q12 -->
+<div class="question-block">
+  <div class="q-num">Question 12</div>
+  <div class="q-text">
+    <p>An <strong>8 MB</strong> heap file has <strong>64 KB</strong> pages. How many I/Os for:</p>
+    <ol style="list-style-type: lower-alpha;">
+      <li>Worst-case equality search on a primary key (heap file)?</li>
+      <li>Same file but <strong>sorted</strong> — equality search using binary search?</li>
+    </ol>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>Number of pages: 8 MB / 64 KB = 8000 KB / 64 KB = <strong>125 pages</strong>.</p>
+    <p style="margin-top: 0.5rem;"><strong>(a) Heap worst case: 125 I/Os</strong></p>
+    <p>Must scan every page because records are unordered. The target could be on the last page (or not exist at all).</p>
+    <p style="margin-top: 0.5rem;"><strong>(b) Sorted binary search: ceil(log<sub>2</sub>(125)) = 7 I/Os</strong></p>
+    <p>Binary search halves the search space each step. 2<sup>7</sup> = 128 > 125, so at most 7 page reads.</p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Takeaway:</strong> Sorting reduces equality search from O(N) to O(log N) pages. This is why indexes exist — they provide the benefits of sorting without requiring the entire file to be sorted.</p>
+  </div>
+</div>
+
+<!-- ===================== SECTION 3: B+ Trees ===================== -->
+<h2>Section 3: B+ Trees (5 Questions)</h2>
+<p class="section-info">Tree structure, splits, bulk loading, composite indexes, and I/O analysis.</p>
+
+<!-- Q13 -->
+<div class="question-block">
+  <div class="q-num">Question 13</div>
+  <div class="q-text">
+    <p>In a B+ tree of <strong>order d = 2</strong>:</p>
+    <ol style="list-style-type: lower-alpha;">
+      <li>What is the max number of keys per node?</li>
+      <li>What is the minimum number of keys per non-root node?</li>
+      <li>What is the max fanout (children) of an interior node?</li>
+    </ol>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <ol style="list-style-type: lower-alpha;">
+      <li><strong>2d = 4 keys</strong> maximum per node.</li>
+      <li><strong>d = 2 keys</strong> minimum per non-root node (occupancy invariant).</li>
+      <li><strong>2d + 1 = 5 children</strong> maximum per interior node (one more pointer than keys).</li>
+    </ol>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>B+ tree invariants:</strong> Each node has between d and 2d keys (except the root, which can have as few as 1). Interior nodes have one more pointer than keys. These invariants guarantee the tree stays balanced and at least 50% full.</p>
+  </div>
+</div>
+
+<!-- Q14 -->
+<div class="question-block">
+  <div class="q-num">Question 14</div>
+  <div class="q-text">
+    <p>Explain the <strong>critical difference</strong> between leaf node splits and interior node splits during B+ tree insertion.</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p><strong>Leaf split: COPY UP</strong></p>
+    <ul>
+      <li>The middle key is <em>copied</em> up to the parent.</li>
+      <li>The key <strong>stays in the leaf</strong> because leaf keys are needed to find actual data records.</li>
+      <li>After the split, the copied key appears in both the leaf and the parent.</li>
+    </ul>
+    <p style="margin-top: 0.5rem;"><strong>Interior split: PUSH UP</strong></p>
+    <ul>
+      <li>The middle key is <em>pushed</em> up to the parent.</li>
+      <li>The key is <strong>removed from the interior node</strong> — it only serves as a routing guide, not as data.</li>
+      <li>After the split, the pushed key appears only in the parent.</li>
+    </ul>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Mnemonic:</strong> Leaves hold data, so keys must stay (COPY). Interior nodes are just routers, so keys can move (PUSH).</p>
+  </div>
+</div>
+
+<!-- Q15 -->
+<div class="question-block">
+  <div class="q-num">Question 15</div>
+  <div class="q-text">
+    <p>You have <strong>1,000 records</strong> to bulk load into an Alt-2 B+ tree. The fill factor is <strong>2/3</strong> and each leaf can hold a maximum of <strong>6 entries</strong>.</p>
+    <p>How many leaf pages result from the bulk load?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>With fill factor 2/3, each leaf holds: 6 &times; 2/3 = <strong>4 entries</strong>.</p>
+    <p>Leaf pages: 1000 / 4 = <strong>250 leaf pages</strong>.</p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> Bulk loading sorts the data first, then fills leaves left-to-right to the specified fill factor. The fill factor < 1 leaves room for future insertions without immediate splits. Alt-2 means the leaf entries are <code>(key, recordId)</code> pairs — the data lives separately in heap file pages.</p>
+  </div>
+</div>
+
+<!-- Q16 -->
+<div class="question-block">
+  <div class="q-num">Question 16</div>
+  <div class="q-text">
+    <p>A composite index exists on <code>(last_name, first_name)</code>. Which of these queries can use the index?</p>
+    <ol style="list-style-type: lower-alpha;">
+      <li><code>WHERE last_name = 'Smith'</code></li>
+      <li><code>WHERE first_name = 'John'</code></li>
+      <li><code>WHERE last_name = 'Smith' AND first_name = 'John'</code></li>
+      <li><code>WHERE first_name = 'John' AND last_name = 'Smith'</code></li>
+    </ol>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <ol style="list-style-type: lower-alpha;">
+      <li><strong>Yes</strong> — matches the leftmost prefix of the composite key.</li>
+      <li><strong>No</strong> — <code>first_name</code> is NOT the leftmost prefix. The index sorts by last_name first, so without constraining last_name, the index cannot narrow the search.</li>
+      <li><strong>Yes</strong> — matches the full composite key.</li>
+      <li><strong>Yes</strong> — same as (c). The SQL optimizer reorders predicates to match the index order. The order of AND conditions in the WHERE clause doesn't matter.</li>
+    </ol>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Prefix rule:</strong> A composite index on (A, B, C) can be used for queries constraining A, or A+B, or A+B+C — always from the leftmost column. Think of it like a phone book sorted by last name then first name.</p>
+  </div>
+</div>
+
+<!-- Q17 -->
+<div class="question-block">
+  <div class="q-num">Question 17</div>
+  <div class="q-text">
+    <p>A height-3 Alt-2 B+ tree has a <strong>clustered</strong> index. A range query returns <strong>100 records</strong> spread across <strong>5 consecutive leaf pages</strong> and <strong>5 consecutive data pages</strong>.</p>
+    <p>How many I/Os? What if the index were <strong>unclustered</strong>?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p><strong>Clustered index:</strong></p>
+    <ul>
+      <li>3 I/Os — traverse tree from root to first matching leaf</li>
+      <li>5 I/Os — read 5 consecutive leaf pages (following sibling pointers)</li>
+      <li>5 I/Os — read 5 consecutive data pages (clustered = data is sorted in same order as index)</li>
+    </ul>
+    <p><strong>Total: 3 + 5 + 5 = 13 I/Os</strong></p>
+    <p style="margin-top: 0.5rem;"><strong>Unclustered index:</strong></p>
+    <ul>
+      <li>3 I/Os — traverse tree</li>
+      <li>5 I/Os — read leaf pages</li>
+      <li>Up to <strong>100 I/Os</strong> — each record could be on a <em>different</em> data page</li>
+    </ul>
+    <p><strong>Total: 3 + 5 + up to 100 = up to 108 I/Os</strong></p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Takeaway:</strong> Clustered indexes are dramatically better for range queries because consecutive index entries point to consecutive data pages. Unclustered indexes can degrade to nearly one I/O per record.</p>
+  </div>
+</div>
+
+<!-- ===================== SECTION 4: Spatial Indexes ===================== -->
+<h2>Section 4: Spatial Indexes (3 Questions)</h2>
+<p class="section-info">KD trees, R-trees, and spatial data structures.</p>
+
+<!-- Q18 -->
+<div class="question-block">
+  <div class="q-num">Question 18</div>
+  <div class="q-text">
+    <p>In a KD tree, the root splits on <strong>X at value 5</strong>. Its left child splits on <strong>Y at value 3</strong>. You are searching for point <strong>(4, 6)</strong>.</p>
+    <p>Describe the search path.</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <ol>
+      <li><strong>Root (X = 5):</strong> Query x-coordinate is 4. Since 4 &lt; 5, go <strong>LEFT</strong>.</li>
+      <li><strong>Left child (Y = 3):</strong> Query y-coordinate is 6. Since 6 &gt; 3, go <strong>RIGHT</strong>.</li>
+      <li>Continue searching in the right subtree (next split dimension would be X again).</li>
+    </ol>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key rule:</strong> KD trees alternate splitting dimensions at each level. Level 0 = X, Level 1 = Y, Level 2 = X, Level 3 = Y, etc. At each node, compare the query's coordinate in the current dimension against the split value.</p>
+  </div>
+</div>
+
+<!-- Q19 -->
+<div class="question-block">
+  <div class="q-num">Question 19</div>
+  <div class="q-text">
+    <p>How does an R-tree choose which subtree to insert a new point into?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>Choose the subtree whose <strong>MBR (Minimum Bounding Rectangle) needs the least expansion</strong> (smallest increase in area) to accommodate the new point.</p>
+    <p style="margin-top: 0.5rem;">This heuristic minimizes overlap between sibling MBRs and reduces wasted space, leading to more efficient searches. If the point falls inside an existing MBR, that subtree requires zero expansion and is preferred.</p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Contrast with B+ trees:</strong> B+ trees use key comparison to route insertions (deterministic). R-trees use a heuristic (least area expansion) because spatial data doesn't have a single linear ordering.</p>
+  </div>
+</div>
+
+<!-- Q20 -->
+<div class="question-block">
+  <div class="q-num">Question 20</div>
+  <div class="q-text">
+    <p>Name <strong>3 key differences</strong> between KD trees and R-trees.</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <ol>
+      <li><strong>Branching factor:</strong> KD trees are <em>binary</em> (each node has 2 children). R-trees are <em>multi-way balanced</em> trees (like B+ trees, with high fanout).</li>
+      <li><strong>Region overlap:</strong> KD tree regions are <em>non-overlapping</em> (space is cleanly partitioned). R-tree MBRs <em>can overlap</em>, which means a search may need to explore multiple subtrees.</li>
+      <li><strong>Balance guarantee:</strong> KD trees are <em>not guaranteed balanced</em> (depends on insertion order). R-trees are <em>always balanced</em> (all leaves at same depth, like B+ trees).</li>
+    </ol>
+    <p style="margin-top: 0.5rem;">Additional differences:</p>
+    <ul>
+      <li>R-trees are more <strong>disk-friendly</strong> (node = page, high fanout reduces tree height).</li>
+      <li>KD trees are better for <strong>in-memory nearest-neighbor search</strong>.</li>
+      <li>KD trees split on one dimension per level; R-trees use bounding rectangles covering all dimensions simultaneously.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== SECTION 5: Buffer Management ===================== -->
+<h2>Section 5: Buffer Management (5 Questions)</h2>
+<p class="section-info">LRU, MRU, Clock policy, pin counts, dirty bits, and sequential flooding.</p>
+
+<!-- Q21 -->
+<div class="question-block">
+  <div class="q-num">Question 21</div>
+  <div class="q-text">
+    <p><strong>MRU Policy.</strong> Given <strong>4 buffer frames</strong> and the access pattern:</p>
+    <pre><code>I  L  O  V  E  D  B  Y  I  P  P  E</code></pre>
+    <p>What are the final pages in the buffer? How many cache hits?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>MRU evicts the <strong>most recently used</strong> (accessed) page when the buffer is full.</p>
+    <pre><code>Step  Access  Buffer State         Action
+ 1     I      [I, _, _, _]          miss — load I
+ 2     L      [I, L, _, _]         miss — load L
+ 3     O      [I, L, O, _]         miss — load O
+ 4     V      [I, L, O, V]         miss — load V (buffer full)
+ 5     E      [I, L, O, E]         miss — evict V (MRU), load E
+ 6     D      [I, L, O, D]         miss — evict E (MRU), load D
+ 7     B      [I, L, O, B]         miss — evict D (MRU), load B
+ 8     Y      [I, L, O, Y]         miss — evict B (MRU), load Y
+ 9     I      [I, L, O, Y]         HIT  — I is in buffer (#1)
+10     P      [P, L, O, Y]         miss — evict I (MRU), load P
+11     P      [P, L, O, Y]         HIT  — P is in buffer (#2)
+12     E      [E, L, O, Y]         miss — evict P (MRU), load E</code></pre>
+    <p><strong>Final pages: {E, L, O, Y}. Cache hits: 2.</strong></p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Key insight:</strong> MRU tends to keep "old" pages and thrash the most recently used slot. This actually works well for sequential scans (repeated passes over a file) where LRU would fail.</p>
+  </div>
+</div>
+
+<!-- Q22 -->
+<div class="question-block">
+  <div class="q-num">Question 22</div>
+  <div class="q-text">
+    <p><strong>LRU Policy.</strong> Given <strong>4 buffer frames</strong> and the access pattern:</p>
+    <pre><code>A  B  T  P  H  M  O  A  A  B  A  C  B  E  A  F  G  B</code></pre>
+    <p>What are the final pages in the buffer? How many cache hits?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p>LRU evicts the <strong>least recently used</strong> (accessed longest ago) page.</p>
+    <pre><code>Step  Access  Buffer (LRU order, leftmost=LRU)  Action
+ 1     A      [A]                                 miss
+ 2     B      [A, B]                              miss
+ 3     T      [A, B, T]                           miss
+ 4     P      [A, B, T, P]                        miss (full)
+ 5     H      [B, T, P, H]                        miss — evict A (LRU)
+ 6     M      [T, P, H, M]                        miss — evict B (LRU)
+ 7     O      [P, H, M, O]                        miss — evict T (LRU)
+ 8     A      [H, M, O, A]                        miss — evict P (LRU)
+ 9     A      [H, M, O, A]                        HIT (#1)
+10     B      [M, O, A, B]                        miss — evict H (LRU)
+11     A      [M, O, B, A]                        HIT (#2) — A moves to MRU
+12     C      [O, B, A, C]                        miss — evict M (LRU)
+13     B      [O, A, C, B]                        HIT (#3) — B moves to MRU
+14     E      [A, C, B, E]                        miss — evict O (LRU)
+15     A      [C, B, E, A]                        HIT (#4) — A moves to MRU
+16     F      [B, E, A, F]                        miss — evict C (LRU)
+17     G      [E, A, F, G]                        miss — evict B (LRU)
+18     B      [A, F, G, B]                        miss — evict E (LRU)</code></pre>
+    <p><strong>Final pages: {A, F, G, B}. Cache hits: 4.</strong></p>
+  </div>
+</div>
+
+<!-- Q23 -->
+<div class="question-block">
+  <div class="q-num">Question 23</div>
+  <div class="q-text">
+    <p><strong>Clock Policy.</strong> 6 buffer frames. Pages loaded: A (pinned), B (pinned), C, D, E, F — all with ref bit = 1. Clock hand starts at frame 0 (A). Pages are unpinned immediately unless noted as "pinned."</p>
+    <p>A request for page <strong>G</strong> arrives (G must remain pinned). Which page is evicted? Then page <strong>F</strong> is requested. What happens?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p><strong>Eviction search for G:</strong></p>
+    <ol>
+      <li>Frame 0 (A): <strong>pinned</strong> — skip.</li>
+      <li>Frame 1 (B): <strong>pinned</strong> — skip.</li>
+      <li>Frame 2 (C): ref = 1, unpinned — <strong>clear ref to 0</strong>, advance.</li>
+      <li>Frame 3 (D): ref = 1, unpinned — <strong>clear ref to 0</strong>, advance.</li>
+      <li>Frame 4 (E): ref = 1, unpinned — <strong>clear ref to 0</strong>, advance.</li>
+      <li>Frame 5 (F): ref = 1, unpinned — <strong>clear ref to 0</strong>, advance.</li>
+      <li>Frame 0 (A): still <strong>pinned</strong> — skip.</li>
+      <li>Frame 1 (B): still <strong>pinned</strong> — skip.</li>
+      <li>Frame 2 (C): ref = 0, unpinned — <strong>EVICT C</strong>. Load G into frame 2.</li>
+    </ol>
+    <p style="margin-top: 0.5rem;"><strong>Then F is requested:</strong> F is already in the buffer (frame 5) — <strong>cache hit</strong>. Set ref bit = 1.</p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Clock algorithm:</strong> Sweep the clock hand. Pinned pages are always skipped. For unpinned pages: if ref = 1, clear it and move on ("second chance"). If ref = 0, evict it. This approximates LRU.</p>
+  </div>
+</div>
+
+<!-- Q24 -->
+<div class="question-block">
+  <div class="q-num">Question 24</div>
+  <div class="q-text">
+    <p>A page in the buffer pool has <strong>pin count = 3</strong> and <strong>dirty bit = true</strong>. Can it be evicted? What happens when it is eventually evicted?</p>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <p><strong>No, it cannot be evicted.</strong> A pin count > 0 means at least one query (in this case, 3 queries) is still actively using the page. The buffer manager must wait until all three queries call <code>unpin()</code> and the pin count reaches 0.</p>
+    <p style="margin-top: 0.5rem;"><strong>When eventually evicted:</strong> Since the dirty bit is true (the page was modified in memory), the page <strong>must be written back to disk</strong> before the buffer frame can be reused. This is an extra I/O cost. If the dirty bit were false, the frame could simply be overwritten since the disk already has the current version.</p>
+    <p style="color: var(--muted); margin-top: 0.5rem;"><strong>Pin count semantics:</strong> <code>pin()</code> increments the count (requestor starts using the page). <code>unpin()</code> decrements it (requestor is done). A page is eligible for eviction only when pin count = 0.</p>
+  </div>
+</div>
+
+<!-- Q25 -->
+<div class="question-block">
+  <div class="q-num">Question 25</div>
+  <div class="q-text">
+    <p><strong>True or False:</strong></p>
+    <ol style="list-style-type: lower-alpha;">
+      <li>The buffer manager sets the dirty bit.</li>
+      <li>Sequential flooding happens with MRU.</li>
+      <li>Clock policy with max ref counter of 1 approximates LRU.</li>
+      <li>If a file is smaller than the buffer pool, LRU and MRU give the same hit rate.</li>
+    </ol>
+  </div>
+  <button class="toggle-btn">Show Solution</button>
+  <div class="solution">
+    <div class="solution-label">Solution</div>
+    <ol style="list-style-type: lower-alpha;">
+      <li><strong>FALSE.</strong> The <em>requestor</em> (the query/operator using the page) sets the dirty bit when it unpins a modified page, not the buffer manager itself. The buffer manager only checks the dirty bit during eviction.</li>
+      <li><strong>FALSE.</strong> Sequential flooding is an <strong>LRU problem</strong>. When sequentially scanning a file larger than the buffer, LRU evicts the page that was accessed longest ago — which is exactly the next page you'll need on the next scan pass. MRU handles sequential scans well by keeping early pages cached.</li>
+      <li><strong>TRUE.</strong> The Clock algorithm with a single ref bit gives each page a "second chance" before eviction, which approximates LRU behavior. Pages that haven't been accessed recently will have their ref bit cleared and be evicted first.</li>
+      <li><strong>TRUE.</strong> When the entire file fits in the buffer pool, after the initial cold-start misses, all pages remain cached regardless of the eviction policy. No evictions ever occur, so LRU, MRU, Clock, and random all yield the same hit rate.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ===================== BOTTOM SECTION ===================== -->
+<div class="score-card" style="margin-top: 3rem;">
+  <p style="font-size: 1.2rem; font-weight: 700; color: var(--green);">Review Complete</p>
+  <p style="color: var(--muted); margin-top: 0.5rem;">Score yourself: aim for 20+ correct on exam day.</p>
+  <p style="color: var(--muted); margin-top: 0.25rem;">SQL: __/8 &nbsp; | &nbsp; Disks & Files: __/4 &nbsp; | &nbsp; B+ Trees: __/5 &nbsp; | &nbsp; Spatial: __/3 &nbsp; | &nbsp; Buffer Mgmt: __/5</p>
+</div>
+
+<script>
+// Toggle individual solutions
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const sol = btn.nextElementSibling;
+    sol.classList.toggle('visible');
+    btn.textContent = sol.classList.contains('visible') ? 'Hide Solution' : 'Show Solution';
+  });
+});
+
+// Show All / Hide All
+function toggleAll(show) {
+  document.querySelectorAll('.solution').forEach(sol => {
+    if (show) {
+      sol.classList.add('visible');
+    } else {
+      sol.classList.remove('visible');
+    }
+  });
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.textContent = show ? 'Hide Solution' : 'Show Solution';
+  });
+}
+</script>
+
+<script src="chat-widget.js?v=11"></script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 186 Midterm 1 — Exam Day Cheat Sheet</title>
+<style>
+:root {
+  --bg: #0f1117; --card: #1a1d2e; --text: #e0e0e8; --muted: #8a8fa8;
+  --accent: #4A90D9; --green: #34d399; --red: #f87171; --orange: #fb923c;
+  --purple: #a78bfa; --yellow: #fbbf24; --border: #2a2d3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  line-height: 1.5; padding: 1.5rem 1rem;
+  max-width: 1100px; margin: 0 auto;
+}
+h1 { font-size: 1.8rem; text-align: center; color: var(--accent); margin-bottom: 0.25rem; }
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 1rem; font-size: 0.85rem; }
+h2 { font-size: 1.1rem; color: var(--accent); margin: 1.25rem 0 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+h3 { font-size: 0.95rem; color: var(--orange); margin: 0.75rem 0 0.35rem; }
+p, li { margin-bottom: 0.25rem; font-size: 0.88rem; }
+ul, ol { padding-left: 1.2rem; }
+code { font-family: 'SF Mono', 'Fira Code', monospace; background: #161824; padding: 1px 4px; border-radius: 3px; font-size: 0.82em; color: var(--green); }
+pre { background: #161824; padding: 0.6rem; border-radius: 6px; overflow-x: auto; font-size: 0.78rem; line-height: 1.4; margin: 0.3rem 0 0.6rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { width: 100%; border-collapse: collapse; margin: 0.4rem 0; font-size: 0.82rem; }
+th { background: var(--card); color: var(--accent); padding: 0.35rem 0.5rem; text-align: left; border: 1px solid var(--border); font-weight: 600; }
+td { padding: 0.3rem 0.5rem; border: 1px solid var(--border); }
+.nav-bar { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.nav-bar a { padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; transition: 0.2s; }
+.nav-active { background: var(--accent); color: #fff !important; }
+.nav-link { background: var(--card); color: var(--text) !important; border: 1px solid var(--accent); }
+.nav-link:hover { background: var(--accent); color: #fff !important; text-decoration: none; }
+a { color: var(--accent); text-decoration: none; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.section-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
+.formula { background: #111322; border-left: 3px solid var(--accent); padding: 0.4rem 0.75rem; margin: 0.3rem 0; border-radius: 0 4px 4px 0; font-family: monospace; font-size: 0.82rem; }
+.warning { background: #1a1122; border-left: 3px solid var(--red); padding: 0.4rem 0.75rem; margin: 0.3rem 0; border-radius: 0 4px 4px 0; font-size: 0.82rem; }
+.tip { background: #0f1a15; border-left: 3px solid var(--green); padding: 0.4rem 0.75rem; margin: 0.3rem 0; border-radius: 0 4px 4px 0; font-size: 0.82rem; }
+
+.side-label { text-align: center; font-size: 1rem; font-weight: 700; color: var(--yellow); letter-spacing: 0.05em; text-transform: uppercase; margin: 1.5rem 0 0.75rem; padding: 0.4rem; background: rgba(251, 191, 36, 0.08); border: 1px dashed var(--yellow); border-radius: 6px; }
+
+@media print {
+  body { background: #fff; color: #000; font-size: 9pt; line-height: 1.3; padding: 0.25in; max-width: none; }
+  .nav-bar, .no-print { display: none !important; }
+  h1 { font-size: 14pt; color: #000; }
+  h2 { font-size: 11pt; color: #000; border-color: #000; }
+  h3 { font-size: 10pt; color: #333; }
+  .section-box { border: 1px solid #999; background: #fff; }
+  table { font-size: 8pt; }
+  th { background: #eee; color: #000; }
+  td { border-color: #999; }
+  .formula, .warning, .tip { border-left-width: 2px; }
+  code { background: #f0f0f0; color: #000; }
+  pre { background: #f5f5f5; border-color: #999; font-size: 7.5pt; }
+  .two-col { gap: 0.5rem; }
+  .side-label { background: #f5f5f5; border-color: #333; color: #000; }
+  @page { size: letter; margin: 0.3in; }
+}
+
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="index.html" class="nav-link">Flashcards</a>
+  <a href="study-guide.html" class="nav-link">Study Guide</a>
+  <a href="cheatsheet.html" class="nav-link">Cheat Sheet</a>
+  <a href="extended-cheatsheet.html" class="nav-link">Extended Reference</a>
+  <a href="practice-tests.html" class="nav-link">Practice Tests</a>
+  <a href="final-review.html" class="nav-link">Final Review</a>
+  <a href="exam-cheatsheet.html" class="nav-active">Exam Cheat Sheet</a>
+</div>
+
+<h1>Exam Day Cheat Sheet</h1>
+<p class="subtitle">Everything you need on your 8.5x11 double-sided handwritten sheet</p>
+
+<button onclick="window.print()" class="no-print" style="background:var(--accent);color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:600;display:block;margin:0 auto 1rem;">Print This Cheat Sheet</button>
+
+<!-- ============================= SIDE 1 ============================= -->
+<div class="side-label">Side 1 (Front)</div>
+
+<div class="two-col">
+
+<!-- LEFT COLUMN -->
+<div>
+
+<!-- SQL Evaluation Order -->
+<div class="section-box">
+<h3>SQL Evaluation Order</h3>
+<div class="formula">FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; SELECT &rarr; ORDER BY &rarr; LIMIT</div>
+<ul>
+  <li><strong>WHERE</strong>: filters rows <em>before</em> grouping, <strong>NO aggregates</strong> allowed</li>
+  <li><strong>HAVING</strong>: filters groups <em>after</em> aggregation, <strong>CAN</strong> use aggregates</li>
+  <li>SELECT aliases usable in ORDER BY, <strong>NOT</strong> in WHERE</li>
+</ul>
+</div>
+
+<!-- SQL Aggregates -->
+<div class="section-box">
+<h3>SQL Aggregates</h3>
+<ul>
+  <li><code>COUNT(*)</code> includes NULLs, <code>COUNT(col)</code> excludes NULLs</li>
+  <li><code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code> all ignore NULLs</li>
+  <li>Every non-agg column in SELECT <strong>must</strong> be in GROUP BY</li>
+</ul>
+</div>
+
+<!-- Joins -->
+<div class="section-box">
+<h3>Joins</h3>
+<table>
+  <tr><th>Type</th><th>Result</th></tr>
+  <tr><td>Cross</td><td>m &times; n rows (Cartesian product)</td></tr>
+  <tr><td>Inner ON</td><td>Only matching rows</td></tr>
+  <tr><td>Natural</td><td>Auto-match same-name cols</td></tr>
+  <tr><td>LEFT OUTER</td><td>All left + NULL for non-matches</td></tr>
+  <tr><td>RIGHT OUTER</td><td>All right + NULL for non-matches</td></tr>
+</table>
+</div>
+
+<!-- SQL Pitfalls -->
+<div class="section-box">
+<h3>SQL Pitfalls</h3>
+<div class="warning">
+<ul>
+  <li>Integer division: <code>5/2=2</code>. Fix: <code>CAST(x AS FLOAT)</code></li>
+  <li><code>NULL=NULL</code> is UNKNOWN, use <code>IS NULL</code></li>
+  <li><code>NOT IN</code> with NULLs &rarr; returns nothing! Use <code>NOT EXISTS</code></li>
+  <li><code>DISTINCT</code> + <code>ORDER BY</code>: ORDER BY cols must be in SELECT</li>
+</ul>
+</div>
+</div>
+
+<!-- Set Operations & Subqueries -->
+<div class="section-box">
+<h3>Set Operations</h3>
+<p><code>UNION</code> (dedup), <code>UNION ALL</code> (keep all), <code>INTERSECT</code>, <code>EXCEPT</code></p>
+<h3>Subqueries</h3>
+<p>Keywords: <code>IN</code>, <code>EXISTS</code>, <code>NOT EXISTS</code>, <code>ALL</code>, <code>ANY</code></p>
+<ul>
+  <li><strong>Correlated</strong>: refs outer query, re-runs per row (slow)</li>
+  <li><strong>Uncorrelated</strong>: runs once independently</li>
+</ul>
+</div>
+
+</div>
+
+<!-- RIGHT COLUMN -->
+<div>
+
+<!-- IO Cost -->
+<div class="section-box">
+<h3>IO Cost Table</h3>
+<p style="font-size:0.8rem;color:var(--muted);">B = pages, R = records/page</p>
+<table>
+  <tr><th>Op</th><th>Heap</th><th>Sorted</th></tr>
+  <tr><td>Scan</td><td>B</td><td>B</td></tr>
+  <tr><td>Equality</td><td>B/2 avg</td><td>log<sub>2</sub>(B)</td></tr>
+  <tr><td>Range</td><td>B</td><td>log<sub>2</sub>(B) + matches</td></tr>
+  <tr><td>Insert</td><td>2</td><td>log<sub>2</sub>(B) + 2B</td></tr>
+  <tr><td>Delete</td><td>search + 1</td><td>log<sub>2</sub>(B) + 2B</td></tr>
+</table>
+</div>
+
+<!-- Record Sizes -->
+<div class="section-box">
+<h3>Record Sizes</h3>
+<table>
+  <tr><th>Type</th><th>Size</th></tr>
+  <tr><td>INTEGER</td><td>4 bytes</td></tr>
+  <tr><td>FLOAT</td><td>4 bytes</td></tr>
+  <tr><td>CHAR(n)</td><td>ALWAYS n bytes</td></tr>
+  <tr><td>VARCHAR(n)</td><td>0 to n bytes</td></tr>
+  <tr><td>Header</td><td>typically 8 bytes</td></tr>
+</table>
+<div class="formula">Min = header + fixed + VARCHAR(0)</div>
+<div class="formula">Max = header + fixed + VARCHAR(max)</div>
+<div class="formula">Packed page: n &times; rec_size + &lceil;n/8&rceil; &le; page_size</div>
+<p>Unpacked: same formula but allows holes</p>
+</div>
+
+<!-- Slotted Page -->
+<div class="section-box">
+<h3>Slotted Page</h3>
+<ul>
+  <li>Records grow from <strong>TOP</strong>, slot directory from <strong>BOTTOM</strong></li>
+  <li>Record ID = <code>(page_id, slot_number)</code> &mdash; stable</li>
+  <li>Slot entry = <code>(offset, length)</code></li>
+</ul>
+</div>
+
+</div>
+</div><!-- end two-col -->
+
+
+<!-- ============================= SIDE 2 ============================= -->
+<div class="side-label">Side 2 (Back)</div>
+
+<div class="two-col">
+
+<!-- LEFT COLUMN -->
+<div>
+
+<!-- B+ Tree Properties -->
+<div class="section-box">
+<h3>B+ Tree Properties (order d)</h3>
+<table>
+  <tr><th>Property</th><th>Internal Node</th><th>Root</th></tr>
+  <tr><td>Keys</td><td>d to 2d</td><td>1 to 2d</td></tr>
+  <tr><td>Max fanout</td><td colspan="2">2d + 1</td></tr>
+  <tr><td>Min fanout</td><td>d + 1</td><td>2</td></tr>
+</table>
+<div class="tip">All leaves at same depth, doubly-linked</div>
+</div>
+
+<!-- B+ Tree Insert -->
+<div class="section-box">
+<h3>B+ Tree Insert (MOST TESTED!)</h3>
+<ol>
+  <li>Search &rarr; correct leaf</li>
+  <li>Insert key</li>
+  <li>If overflow (&gt; 2d keys):
+    <div class="warning"><strong>LEAF</strong> split &rarr; <strong>COPY UP</strong> middle key (stays in leaf!)</div>
+    <div class="warning"><strong>INTERIOR</strong> split &rarr; <strong>PUSH UP</strong> middle key (removed from node!)</div>
+  </li>
+  <li>May cascade to root</li>
+</ol>
+</div>
+
+<!-- B+ Tree Delete -->
+<div class="section-box">
+<h3>B+ Tree Delete</h3>
+<ol>
+  <li>Remove from leaf</li>
+  <li>If underfull (&lt; d): redistribute from sibling</li>
+  <li>Can't redistribute &rarr; merge + pull down parent key</li>
+</ol>
+</div>
+
+<!-- B+ Tree Alternatives -->
+<div class="section-box">
+<h3>B+ Tree Alternatives</h3>
+<table>
+  <tr><th>Alt</th><th>Leaf Stores</th><th>Clustered?</th></tr>
+  <tr><td>1</td><td>Actual records</td><td>Must be</td></tr>
+  <tr><td>2</td><td>(key, recordID)</td><td>Can be either</td></tr>
+  <tr><td>3</td><td>(key, list of recordIDs)</td><td>Can be either</td></tr>
+</table>
+<div class="warning">Only ONE clustered index per table!</div>
+</div>
+
+<!-- B+ Tree IO Costs -->
+<div class="section-box">
+<h3>B+ Tree IO Costs (Alt 2)</h3>
+<table>
+  <tr><th>Op</th><th>Clustered</th><th>Unclustered</th></tr>
+  <tr><td>Equality</td><td>h + 1</td><td>h + 1</td></tr>
+  <tr><td>Range</td><td>h + leaf_pages + data_pages</td><td>h + leaf_pages + up to records</td></tr>
+</table>
+</div>
+
+<!-- Composite Index -->
+<div class="section-box">
+<h3>Composite Index Prefix Rule</h3>
+<div class="formula">Index (A,B,C) &rarr; can use for A, (A,B), (A,B,C)</div>
+<div class="warning">CANNOT use for just B or C alone</div>
+</div>
+
+<!-- Bulk Loading -->
+<div class="section-box">
+<h3>Bulk Loading</h3>
+<p>Sort &rarr; fill leaves to fill factor &rarr; build up</p>
+<div class="formula">Entries/leaf = floor(2d &times; fill_factor)</div>
+<div class="formula">Leaf pages = ceil(records / entries_per_leaf)</div>
+</div>
+
+</div>
+
+<!-- RIGHT COLUMN -->
+<div>
+
+<!-- KD Trees -->
+<div class="section-box">
+<h3>KD Trees</h3>
+<ul>
+  <li>Binary tree, alternating split dimensions</li>
+  <li>Level 0: X, Level 1: Y, Level 2: X...</li>
+  <li>Non-overlapping regions</li>
+  <li><strong>Nearest neighbor</strong>: traverse down, backtrack checking other subtree if distance to split plane &lt; best distance</li>
+</ul>
+</div>
+
+<!-- R-Trees -->
+<div class="section-box">
+<h3>R-Trees</h3>
+<ul>
+  <li>Like B+ for spatial data</li>
+  <li>MBRs (Minimum Bounding Rectangles) <strong>CAN overlap</strong></li>
+  <li>Insert: choose subtree needing <strong>LEAST expansion</strong></li>
+  <li>Search may follow multiple paths</li>
+  <li>Always balanced</li>
+</ul>
+</div>
+
+<!-- Buffer Pool -->
+<div class="section-box">
+<h3>Buffer Pool</h3>
+<p>Frame metadata: <code>Page ID</code>, <code>Dirty Bit</code>, <code>Pin Count</code></p>
+<ul>
+  <li>Pin &gt; 0 &rarr; <strong>CANNOT evict</strong></li>
+  <li>Dirty bit set by <strong>REQUESTOR</strong>, not buffer manager!</li>
+  <li>On eviction: if dirty, write to disk first</li>
+</ul>
+</div>
+
+<!-- Replacement Policies -->
+<div class="section-box">
+<h3>Replacement Policies</h3>
+<table>
+  <tr><th>Policy</th><th>Evicts</th><th>Good For</th><th>Bad For</th></tr>
+  <tr><td>LRU</td><td>Oldest access</td><td>General use</td><td>Sequential flooding</td></tr>
+  <tr><td>MRU</td><td>Most recent</td><td>Sequential scans</td><td>General use</td></tr>
+  <tr><td>Clock</td><td>ref=0 frame</td><td>Approx LRU</td><td>&mdash;</td></tr>
+</table>
+</div>
+
+<!-- Clock Algorithm -->
+<div class="section-box">
+<h3>Clock Algorithm</h3>
+<ol>
+  <li>Check frame at hand</li>
+  <li>Pinned? &rarr; skip, advance</li>
+  <li>ref &gt; 0? &rarr; decrement, skip, advance</li>
+  <li>ref = 0? &rarr; <strong>EVICT!</strong> Load new page, set ref=1</li>
+  <li>Hand stays where it stopped</li>
+</ol>
+</div>
+
+<!-- Sequential Flooding -->
+<div class="section-box">
+<h3>Sequential Flooding</h3>
+<div class="warning">LRU + scan &gt; buffer &rarr; <strong>0 hits</strong>. MRU avoids this.</div>
+</div>
+
+</div>
+</div><!-- end two-col -->
+
+<script src="chat-widget.js?v=11"></script>
+</body>
+</html>

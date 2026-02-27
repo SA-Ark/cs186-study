@@ -46,7 +46,7 @@ EXAM INFO: Midterm 1 is Thu 2/26, 8-10 PM. One 8.5x11 double-sided handwritten c
 SCOPE: SQL, Disks/Files/Records, IO Cost Model, B+ Trees, Spatial Indexes, Buffer Management.
 NOT IN SCOPE: Sorting/Hashing, Relational Algebra, Join Algorithms, Query Optimization.
 
-STUDY MATERIALS: The student has a printable cheat sheet (what they can use in-exam), an extended reference (for deep learning), flashcards with spaced repetition, and a study guide.
+STUDY MATERIALS: The student has a printable cheat sheet (what they can use in-exam), an extended reference (for deep learning), flashcards with spaced repetition, a study guide, a final review test (25 exam-style questions from the review session), and an exam day cheat sheet (condensed guide for what to handwrite).
 
 BEHAVIOR:
 - Be concise but thorough. Use examples when helpful.

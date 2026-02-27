@@ -14,6 +14,8 @@
 - Extended reference (extended-cheatsheet.html): Deep dive into every topic with worked examples — NOT for exam use, for learning only
 - Flashcards (index.html): 50 concept cards + 40 practice problem cards with spaced repetition
 - Study guide (study-guide.html): Comprehensive written guide covering all topics
+- Final Review Test (final-review.html): 25 exam-style questions with toggle solutions, organized by topic — from the Spring 2026 Review Session
+- Exam Day Cheat Sheet (exam-cheatsheet.html): Ultra-condensed 2-column reference — guide for what to handwrite on the allowed sheet
 
 ---
 
@@ -506,3 +508,63 @@ Buffer management traces, replacement policies.
 - VARCHAR(n) = 0 to n bytes
 - Don't forget header bytes
 - Packed vs unpacked bitmap calculations
+
+---
+
+# TOPIC 9: Spring 2026 Midterm 1 Review Session (Supplemental)
+
+## 9.1 Review Session Practice Problems — Buffer Management
+
+### MRU Trace (4 buffer pages): I L O V E D B Y I P P E
+- Fill: I, L, O, V (4 misses)
+- E: evict V (MRU) → slot 4 = E (miss)
+- D: evict E (MRU) → slot 4 = D (miss)
+- B: evict D (MRU) → slot 4 = B (miss)
+- Y: evict B (MRU) → slot 4 = Y (miss)
+- I: **cache hit** (already in buffer)
+- P: evict I (MRU) → slot 1 = P (miss)
+- P: **cache hit**
+- E: evict P (MRU) → slot 1 = E (miss)
+- **Final pages: {E, L, O, Y}. 2 cache hits.**
+
+### LRU Trace (4 buffer pages): A B T P H M O A A B A C B E A F G B
+- Final pages: {G, F, B, A}. 4 cache hits.
+
+### Clock Policy Detailed Walkthrough (6 frames)
+Workload: A (pinned), B (pinned), C, D, E, F, G (pinned), F
+- After loading A-F: all 6 frames full, all ref bits = 1
+- Request G: hand starts at A
+  - A: pinned → skip
+  - B: pinned → skip
+  - C: ref=1 → clear to 0, skip
+  - D: ref=1 → clear to 0, skip
+  - E: ref=1 → clear to 0, skip
+  - F: ref=1 → clear to 0, skip
+  - Back to A: still pinned → skip
+  - B: still pinned → skip
+  - C: ref=0, unpinned → **EVICT C**, load G, set ref=1, pin G
+- Request F: already in buffer → **cache hit**, set ref=1
+
+## 9.2 Review Session — KD Tree Nearest Neighbor Algorithm
+1. Traverse down to find initial candidate nearest point
+2. At each ancestor during backtrack:
+   - Check if the OTHER subtree could contain a closer point
+   - If distance to split plane < current best distance → search other subtree
+   - Update best if closer point found
+3. Application: RAG in LLMs — documents as vectors, find nearest neighbors
+
+## 9.3 Review Session — Key Exam Reminders
+- SQL duplicate rows: SQL uses BAG semantics (allows duplicates) unless DISTINCT
+- SQL nondeterminism: LIMIT without ORDER BY, aggregate ties, NULL ordering
+- B+ tree height for n records: h ≈ log_{2d+1}(n)
+- B+ tree invariants: every non-root node has between d and 2d keys
+- Clock policy: hand does NOT reset between requests — starts where it stopped
+- Sequential flooding: LRU + scan > buffer = 0 hits. MRU fixes this.
+- Sorted file insert cost: log₂(B) to find position + up to B reads + B writes to shift
+
+## 9.4 Review Session — Out-of-Scope Topics (NOT on Midterm 1)
+The review session also covered these topics which are NOT on Midterm 1:
+- **Relational Algebra**: Unary operators (π, σ, ρ, γ), Binary operators (∪, ∩, —, ×, ⋈)
+- **External Merge Sort**: Pass 0 sorts B-page runs, subsequent passes merge B-1 runs. Total passes = 1 + ⌈log_{B-1}(⌈N/B⌉)⌉. IO cost = 2N × passes.
+- **External Hashing**: Partition phase (B-1 output buffers) then rehash phase. Recursive partitioning when partitions > B pages.
+These will be on Midterm 2.
