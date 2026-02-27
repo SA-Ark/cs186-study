@@ -553,6 +553,30 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // Auth seed endpoint — separates token chains from CLI
+    // POST /api/auth/seed { "refresh_token": "sk-ant-ort01-...", "secret": "<SEED_SECRET>" }
+    if (req.method === "POST" && pathname === "/api/auth/seed") {
+      const body = JSON.parse(await readBody(req));
+      if (!body.refresh_token) return jsonResponse(res, 400, { error: "Missing refresh_token" });
+      if (body.secret !== (process.env.SEED_SECRET || "cs186-seed-2026")) {
+        return jsonResponse(res, 403, { error: "Invalid secret" });
+      }
+      try {
+        // Refresh the provided token to get an INDEPENDENT pair for this app
+        const newCreds = await refreshToken(body.refresh_token);
+        _cachedToken = newCreds.accessToken;
+        _cachedExpiresAt = newCreds.expiresAt;
+        jsonResponse(res, 200, {
+          ok: true,
+          message: "Token chain separated. This app now has independent credentials.",
+          expires_at: newCreds.expiresAt,
+        });
+      } catch (err) {
+        jsonResponse(res, 500, { error: "Refresh failed: " + err.message });
+      }
+      return;
+    }
+
     serveStatic(req, res);
   } catch (err) {
     if (!res.headersSent) {
