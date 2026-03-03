@@ -14,6 +14,27 @@ const PORT = parseInt(process.env.PORT || "3000", 10);
 const STATIC_DIR = path.join(__dirname, "public");
 const MODEL = process.env.COCKPIT_MODEL || "claude-opus-4-6";
 
+// Proxy support: if ANTHROPIC_API_URL is set, route through the proxy
+// which handles OAuth tokens for us
+const ANTHROPIC_API_URL = process.env.ANTHROPIC_API_URL || "";
+const USING_PROXY = !!ANTHROPIC_API_URL;
+let PROXY_HOSTNAME = "";
+let PROXY_PATH = "/v1/messages";
+let PROXY_PORT = 443;
+let PROXY_PROTOCOL = https;
+if (USING_PROXY) {
+  const proxyUrl = new URL(
+    ANTHROPIC_API_URL.endsWith("/v1/messages")
+      ? ANTHROPIC_API_URL
+      : ANTHROPIC_API_URL.replace(/\/$/, "") + "/v1/messages"
+  );
+  PROXY_HOSTNAME = proxyUrl.hostname;
+  PROXY_PATH = proxyUrl.pathname;
+  PROXY_PORT = proxyUrl.port ? parseInt(proxyUrl.port) : (proxyUrl.protocol === "https:" ? 443 : 80);
+  PROXY_PROTOCOL = proxyUrl.protocol === "https:" ? https : http;
+  console.log(`Using proxy: ${proxyUrl.href}`);
+}
+
 // OAuth config (same as plan-cockpit)
 const REFRESH_URL = "https://console.anthropic.com/v1/oauth/token";
 const CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
@@ -430,11 +451,27 @@ async function handleChat(req, res) {
     }
   }
 
-  let token;
-  try {
-    token = await getAccessToken();
-  } catch (err) {
-    return jsonResponse(res, 500, { error: "Auth failed: " + err.message });
+  // When using proxy, it handles auth. Otherwise use OAuth.
+  let apiHeaders;
+  if (USING_PROXY) {
+    apiHeaders = {
+      "Content-Type": "application/json",
+      "anthropic-version": "2023-06-01",
+      "anthropic-beta": OAUTH_BETA_HEADER,
+    };
+  } else {
+    let token;
+    try {
+      token = await getAccessToken();
+    } catch (err) {
+      return jsonResponse(res, 500, { error: "Auth failed: " + err.message });
+    }
+    apiHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "anthropic-version": "2023-06-01",
+      "anthropic-beta": OAUTH_BETA_HEADER,
+    };
   }
 
   const apiBody = JSON.stringify({
@@ -445,18 +482,14 @@ async function handleChat(req, res) {
     stream: true,
   });
 
-  // Stream proxy to Anthropic — buffer response to save to DB
-  const apiReq = https.request(
+  // Stream proxy to Anthropic (or ark-proxy) — buffer response to save to DB
+  const apiReq = (USING_PROXY ? PROXY_PROTOCOL : https).request(
     {
-      hostname: "api.anthropic.com",
-      path: "/v1/messages",
+      hostname: USING_PROXY ? PROXY_HOSTNAME : "api.anthropic.com",
+      port: USING_PROXY ? PROXY_PORT : 443,
+      path: USING_PROXY ? PROXY_PATH : "/v1/messages",
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        "anthropic-version": "2023-06-01",
-        "anthropic-beta": OAUTH_BETA_HEADER,
-      },
+      headers: apiHeaders,
     },
     (apiRes) => {
       res.writeHead(apiRes.statusCode, {
